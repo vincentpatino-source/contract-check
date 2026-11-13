@@ -4,8 +4,8 @@
   // ======== SETTINGS: edit these before launch ========
   const SETTINGS = {
     tallyFormId: "",              // e.g. "w4XyZ1" from your Tally form's share link (tally.so/r/w4XyZ1)
-    businessName: "MCA Contract Check",   // your brand name, shown in the header and footer
-    phone: "",                    // e.g. "(555) 555-0123"
+    businessName: "DebtMedx",   // your brand name, shown in the header and footer
+    phone: "1-862-MCA-HERO (1-862-622-4376)",
     apiPath: "/api/analyze"
   };
   // ====================================================
