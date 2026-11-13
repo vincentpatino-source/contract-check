@@ -68,7 +68,18 @@
     statusEl.appendChild(document.createTextNode(msg || ""));
     statusEl.classList.toggle("error", !!isError);
   }
-  function refreshButton() { analyzeBtn.disabled = files.length === 0 || !agree.checked; }
+  const leadName = $("leadName"), leadPhone = $("leadPhone"), leadEmail = $("leadEmail"), contactOk = $("contactOk");
+  const SHARE_TEXT = document.getElementById("agreeText").textContent.replace(/\s+/g, " ").trim();
+  const CONTACT_TEXT = document.getElementById("contactText").textContent.replace(/\s+/g, " ").trim();
+  function lead() {
+    return { name: leadName.value.trim(), phone: leadPhone.value.trim(), email: leadEmail.value.trim(), consent_share: agree.checked, consent_contact: contactOk.checked };
+  }
+  function leadReady() { const l = lead(); return l.name.length > 1 && (l.phone.replace(/\D/g, "").length >= 10 || /.+@.+\..+/.test(l.email)) && l.consent_share; }
+  function refreshButton() {
+    analyzeBtn.disabled = files.length === 0 || !leadReady();
+    const hint = $("formHint");
+    if (hint) hint.textContent = files.length && !leadReady() ? "Add your name, a phone or email, and check the first box to continue." : "";
+  }
   function renderFiles() {
     fileList.innerHTML = "";
     files.forEach((f, i) => {
@@ -91,7 +102,55 @@
   ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
   ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", (e) => { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
-  agree.addEventListener("change", refreshButton);
+  [agree, contactOk].forEach((x) => x.addEventListener("change", refreshButton));
+  [leadName, leadPhone, leadEmail].forEach((x) => x.addEventListener("input", refreshButton));
+
+  // ---------- Copy of each report to DebtMedx ----------
+  function sendToOwner(payload) {
+    return fetch("/api/lead", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
+      .then((r) => r.ok).catch(() => false);
+  }
+  function reportText(c) {
+    const r = c.result, m = c.metrics || {}, inp = c.inp;
+    const lines = [];
+    lines.push("Funder: " + ((r.parties && r.parties.funder) || "unknown") + " | Merchant: " + ((r.parties && r.parties.merchant) || "unknown"));
+    lines.push("Structure: " + (inp.structure === "reverse_consolidation" ? "reverse consolidation" : "lump sum") + " | Signed: " + (inp.signed || "unknown"));
+    lines.push("Payback " + usd(inp.payback) + " | Payment " + (inp.pmt ? usd2(inp.pmt) + " " + inp.freq : "unknown") + " | Net received " + usd(inp.net));
+    if (m.pays) lines.push("First payment " + m.firstPayment + " | Paid to date " + usd(m.paid) + " | Owed " + usd(m.owed) + " | Payoff " + m.payoff + (m.apr ? " | Est. APR " + Math.round(m.apr) + "%" : ""));
+    if (inp.structure === "reverse_consolidation" && m.disb) lines.push("Disbursed " + usd(m.disbToDate) + " of " + usd(m.disbTotal));
+    lines.push("", "Summary: " + (r.summary || ""), "", "Clauses:");
+    (r.clauses || []).forEach((x) => lines.push("- " + (CLAUSE_LABELS[x.key] || x.key) + ": " + (x.found ? (x.risk || "").toUpperCase() : "NOT FOUND") + " - " + (x.summary || "")));
+    lines.push("", "Red flags:");
+    (r.red_flags || []).forEach((t) => lines.push("- " + t));
+    return lines.join("\n");
+  }
+  async function shareReport(c) {
+    const l = c.lead, r = c.result, m = c.metrics || SCHED.metrics(c.inp, asOf), inp = c.inp;
+    const filesOut = [];
+    let size = 0;
+    for (const f of c.job.files || []) {
+      if (f.size > 9000000 || size + f.size > 9000000) continue;
+      filesOut.push({ name: f.name, type: f.type || "application/octet-stream", data: await blobToB64(f) });
+      size += f.size;
+    }
+    return sendToOwner(Object.assign({}, l, {
+      type: "report",
+      consent_share_text: SHARE_TEXT,
+      consent_contact_text: l.consent_contact ? CONTACT_TEXT : "",
+      submitted_at: new Date().toISOString(),
+      page: location.href,
+      file_name: c.name,
+      funder: (r.parties && r.parties.funder) || "",
+      merchant: (r.parties && r.parties.merchant) || "",
+      structure: inp.structure,
+      payback: inp.payback, payment: inp.pmt, frequency: inp.freq,
+      owed: m.pays ? Math.round(m.owed) : "", payoff: m.payoff || "", apr: m.apr ? Math.round(m.apr) : "",
+      high_risks: (r.clauses || []).filter((x) => x.risk === "high").map((x) => CLAUSE_LABELS[x.key] || x.key).join("; "),
+      summary: r.summary || "",
+      report_text: reportText(c),
+      files: filesOut
+    }));
+  }
 
   // ---------- Reading files in the browser ----------
   function blobToB64(blob) {
@@ -159,11 +218,12 @@
     if (imgs.length) jobs.push({ name: "Photos (" + imgs.length + " page" + (imgs.length > 1 ? "s" : "") + ")", files: imgs });
     if (!jobs.length) return;
 
+    const leadInfo = lead();
     contracts = []; cardsEl.innerHTML = ""; stackEl.innerHTML = ""; stackEl.classList.add("hidden");
     $("sampleNote").classList.add("hidden");
     resultsWrap.classList.remove("hidden");
     jobs.forEach((j) => {
-      const c = { id: Math.random().toString(36).slice(2), name: j.name, status: "pending", job: j, node: el("article", "panel contract contract-card") };
+      const c = { id: Math.random().toString(36).slice(2), name: j.name, status: "pending", job: j, lead: leadInfo, node: el("article", "panel contract contract-card") };
       cardsEl.appendChild(c.node); renderCard(c); contracts.push(c);
     });
     files = []; renderFiles(); refreshButton();
@@ -181,6 +241,7 @@
         try { c.result = await analyzeJob(c.job); c.inp = inpFromResult(c.result); c.status = "done"; }
         catch (err) { c.status = "error"; c.error = (err && err.message) || "Something went wrong with this contract."; }
         done++; renderCard(c); renderStack();
+        if (c.status === "done") shareReport(c);
       }
     }
     await Promise.all([worker(), worker()]);
@@ -407,15 +468,23 @@
     stackEl.append(tiles);
     const cta = el("div", "cta-row");
     cta.append(el("p", null, "Want someone to look at options for lowering these payments? It's free and there's no obligation."));
-    const btn = el("button", "primary inline", "Get a free review");
+    const btn = el("button", "primary inline", "Request my free consultation");
     btn.type = "button";
-    btn.addEventListener("click", () => openLeadForm({
-      entry_point: "decoder",
-      contracts: String(done.length),
-      funders: done.map((c) => (c.result.parties && c.result.parties.funder) || "unknown").join("; "),
-      weekly_payments: String(Math.round(weekly)),
-      total_owed: String(Math.round(owed))
-    }));
+    const isSample = done.some((c) => c.id === "sample");
+    btn.addEventListener("click", async () => {
+      if (isSample || !done[0].lead) { openLeadForm({ entry_point: "decoder_sample" }); return; }
+      btn.disabled = true; btn.textContent = "Sending…";
+      const l = done[0].lead;
+      const ok = await sendToOwner(Object.assign({}, l, {
+        type: "consultation_request", submitted_at: new Date().toISOString(), page: location.href,
+        consent_share_text: SHARE_TEXT, consent_contact_text: l.consent_contact ? CONTACT_TEXT : "",
+        funder: done.map((c) => (c.result.parties && c.result.parties.funder) || "unknown").join("; "),
+        owed: Math.round(owed), summary: "Weekly payments " + usd(weekly) + " across " + done.length + " advance(s); " + highs + " high-risk terms.",
+        report_text: done.map(reportText).join("\n\n----------\n\n"), files: []
+      }));
+      btn.textContent = ok ? "Request sent. We'll reach out soon." : "Couldn't send. Please call us.";
+      if (!ok) btn.disabled = false;
+    });
     cta.append(btn);
     stackEl.append(cta);
   }

@@ -30,7 +30,7 @@
       <ul class="checks">
         <li>Reads daily, weekly and reverse consolidation contracts</li>
         <li>Up to 6 contracts at once, with your total weekly payments</li>
-        <li>Free, and your files aren't stored</li>
+        <li>Free. Your documents go only to DebtMedx</li>
       </ul>
     </div>
 
@@ -42,8 +42,15 @@
       </div>
       <input type="file" id="fileInput" accept="application/pdf,image/png,image/jpeg,image/webp" multiple class="hidden">
       <ul class="files" id="fileList"></ul>
-      <label class="agree" for="agree"><input type="checkbox" id="agree"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and understand this is an educational review, not legal advice.</span></label>
+      <div class="lead-fields">
+        <div class="field"><label for="leadName">Your name</label><input id="leadName" type="text" autocomplete="name"></div>
+        <div class="field"><label for="leadPhone">Phone</label><input id="leadPhone" type="tel" autocomplete="tel" inputmode="tel"></div>
+        <div class="field wide"><label for="leadEmail">Email <span class="opt">(phone or email required)</span></label><input id="leadEmail" type="email" autocomplete="email"></div>
+      </div>
+      <label class="agree" for="agree"><input type="checkbox" id="agree"><span id="agreeText">I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a>, understand this is an educational review and not legal advice, and agree to share my uploaded documents and results with DebtMedx, who may contact me about a free consultation.</span></label>
+      <label class="agree" for="contactOk"><input type="checkbox" id="contactOk"><span id="contactText">Optional: DebtMedx may also contact me by phone call, text message or prerecorded message at the number above. Consent is not a condition of using this tool. Message and data rates may apply. Reply STOP to opt out.</span></label>
       <button class="primary" id="analyzeBtn" disabled>Check my contracts</button>
+      <p class="hint" id="formHint"></p>
       <p class="status" id="status" role="status" aria-live="polite"></p>
       <p class="quiet-links"><a href="#" id="quickOpen">Don't have your contract? Estimate in 60 seconds</a> · <button type="button" class="link-btn" id="sampleBtn">See a sample report</button></p>
     </div>
@@ -80,7 +87,7 @@
   <section class="band" id="faq">
     <h2>Questions</h2>
     <details><summary>Is this really free?</summary><p>Yes. Checking your contracts costs nothing. If you'd like help exploring options afterward, you can ask for a free review.</p></details>
-    <details><summary>Do you keep my contracts?</summary><p>No. Your files are read in your browser and sent to our AI provider only to produce your report. We don't store them. See our <a href="privacy.html">privacy policy</a>.</p></details>
+    <details><summary>Who sees my contracts?</summary><p>Your documents and report are sent to our AI provider to produce the review, and a copy goes to DebtMedx so a specialist can follow up about a free consultation. We don't sell your information. See our <a href="privacy.html">privacy policy</a>.</p></details>
     <details><summary>How accurate is the APR?</summary><p>It's an estimate based on the dates and amounts in your contract, assuming payments continue as scheduled. Merchant cash advances often have no fixed term, so treat it as a guide.</p></details>
     <details><summary>What's a reverse consolidation?</summary><p>An advance where the funder pays you in weekly installments, often to cover other advances, while you make payments back. We show both sides of the schedule.</p></details>
     <details><summary>Is this legal advice?</summary><p>No. It's an educational review. For legal questions about your agreement, talk to a licensed attorney.</p></details>

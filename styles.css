@@ -182,3 +182,8 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
 .legal h1 { font-size: 34px; margin: 0; }
 .legal h2 { font-size: 19px; margin-top: 14px; }
 .legal p { max-width: 68ch; }
+
+.lead-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+@media (max-width: 420px) { .lead-fields { grid-template-columns: 1fr; } }
+.lead-fields input { font: 500 15px var(--body); }
+.opt { color: var(--muted); font-weight: 400; }
