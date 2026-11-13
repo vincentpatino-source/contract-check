@@ -3,7 +3,7 @@
 
   // ======== SETTINGS: edit these before launch ========
   const SETTINGS = {
-    tallyFormId: "",              // e.g. "w4XyZ1" from your Tally form's share link (tally.so/r/w4XyZ1)
+    tallyFormId: "M1N2EX",
     businessName: "DebtMedx",   // your brand name, shown in the header and footer
     phone: "1-862-MCA-HERO (1-862-622-4376)",
     apiPath: "/api/analyze"
