@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCA Contract Check: What Your Merchant Cash Advance Really Costs</title>
+<meta name="description" content="Upload your merchant cash advance agreement and see what you still owe, your payoff date, your real APR and the contract terms that matter. Free.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<!-- Google tag: paste your Google Ads / Analytics tag here -->
+<!-- Meta Pixel (optional): paste here -->
+</head>
+<body>
+<header class="site-head">
+  <a class="brand" href="#top" data-brand>MCA Contract Check</a>
+  <nav>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+    <a href="#" class="nav-cta" data-lead="header">Free review</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>What is your merchant cash advance really costing you?</h1>
+      <p class="lede">Upload your MCA agreements. In about a minute you'll see what you still owe, when it's paid off, the real yearly cost, and the contract terms that can hurt you.</p>
+      <ul class="checks">
+        <li>Reads daily, weekly and reverse consolidation contracts</li>
+        <li>Up to 6 contracts at once, with your total weekly payments</li>
+        <li>Free, and your files aren't stored</li>
+      </ul>
+    </div>
+
+    <div class="panel upload" aria-label="Upload your contracts">
+      <h2>Check your contracts</h2>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose contract files">
+        <strong>Drop your agreements here</strong>
+        <span>PDF files, or photos of each page. Tap to choose.</span>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf,image/png,image/jpeg,image/webp" multiple class="hidden">
+      <ul class="files" id="fileList"></ul>
+      <label class="agree" for="agree"><input type="checkbox" id="agree"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and understand this is an educational review, not legal advice.</span></label>
+      <button class="primary" id="analyzeBtn" disabled>Check my contracts</button>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <p class="quiet-links"><a href="#" id="quickOpen">Don't have your contract? Estimate in 60 seconds</a> · <button type="button" class="link-btn" id="sampleBtn">See a sample report</button></p>
+    </div>
+  </section>
+
+  <section class="results hidden" id="results" aria-label="Your results">
+    <div class="banner hidden" id="sampleNote">This is a sample report with made-up numbers. Upload your own contract above to see yours.</div>
+    <div class="panel stack hidden" id="stack"></div>
+    <div class="results" id="cards"></div>
+    <p class="disclaimer">Educational review, not legal advice. Numbers are read from your documents and estimated. Balances assume every payment cleared. Daily payments skip weekends and bank holidays, with a double payment the next business day. Always confirm against your signed agreement.</p>
+  </section>
+
+  <section class="band" id="how">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><strong>Upload</strong><span>Add one or more MCA agreements. PDFs or phone photos both work.</span></li>
+      <li><strong>We read the fine print</strong><span>The payback, fees, payment schedule and 12 key terms, including reconciliation and personal guarantees.</span></li>
+      <li><strong>See your real numbers</strong><span>What you still owe today, your payoff date, and the yearly cost (APR) of the money.</span></li>
+    </ol>
+  </section>
+
+  <section class="band" id="checks">
+    <h2>What we check in every contract</h2>
+    <div class="term-grid">
+      <div><strong>Reconciliation</strong><span>Whether your payment must adjust when your sales drop.</span></div>
+      <div><strong>Personal guarantee</strong><span>Whether you're personally on the hook.</span></div>
+      <div><strong>Confession of judgment</strong><span>Whether the funder can get a judgment without a lawsuit.</span></div>
+      <div><strong>Processor and bank changes</strong><span>Whether switching counts as a default.</span></div>
+      <div><strong>Stacking and cross-default</strong><span>How other advances affect this one.</span></div>
+      <div><strong>Default fees</strong><span>What gets added if you fall behind.</span></div>
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <h2>Questions</h2>
+    <details><summary>Is this really free?</summary><p>Yes. Checking your contracts costs nothing. If you'd like help exploring options afterward, you can ask for a free review.</p></details>
+    <details><summary>Do you keep my contracts?</summary><p>No. Your files are read in your browser and sent to our AI provider only to produce your report. We don't store them. See our <a href="privacy.html">privacy policy</a>.</p></details>
+    <details><summary>How accurate is the APR?</summary><p>It's an estimate based on the dates and amounts in your contract, assuming payments continue as scheduled. Merchant cash advances often have no fixed term, so treat it as a guide.</p></details>
+    <details><summary>What's a reverse consolidation?</summary><p>An advance where the funder pays you in weekly installments, often to cover other advances, while you make payments back. We show both sides of the schedule.</p></details>
+    <details><summary>Is this legal advice?</summary><p>No. It's an educational review. For legal questions about your agreement, talk to a licensed attorney.</p></details>
+  </section>
+
+  <section class="band contact" id="contact">
+    <h2>Talk to someone</h2>
+    <p>Behind on payments or juggling several advances? Ask for a free, no-obligation review.</p>
+    <button class="primary inline" type="button" data-lead="contact">Get a free review</button>
+    <p class="hidden" data-phone-wrap>Or call <strong data-phone></strong></p>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <p><span data-brand>MCA Contract Check</span> · [Business address] · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>
+  <p class="disclaimer">We are not a law firm and do not provide legal, tax or financial advice. Results are estimates for educational purposes. We do not lend money.</p>
+</footer>
+
+<dialog id="quick" aria-labelledby="quickTitle">
+  <div class="dialog-body">
+    <h2 id="quickTitle">Quick estimate</h2>
+    <p class="sub">No contract needed. Add each advance you're paying on.</p>
+    <div id="qeRows" class="qe-rows"></div>
+    <button type="button" class="link-btn" id="qeAdd">+ Add another advance</button>
+    <div class="field" style="max-width: 260px; margin-top: 14px;"><label for="qeRevenue">Monthly sales, optional ($)</label><input id="qeRevenue" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 60000"></div>
+    <div id="qeOut" class="qe-out"></div>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" id="qeClose">Close</button>
+      <button type="button" class="primary inline" id="qeLead">Get a free review</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script async src="https://tally.so/widgets/embed.js"></script>
+<script src="schedule.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
