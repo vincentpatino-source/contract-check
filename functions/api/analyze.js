@@ -95,7 +95,7 @@ export async function onRequestPost({ request, env }) {
     const b64 = (await request.text()).trim();
     if (b64.length > 30000000) return json(413, { error: "This PDF is too large. Try a smaller file or photos of the pages." });
     if (!safeB64(b64)) return json(400, { error: "Couldn't read the upload. Please try again." });
-    payload = '{"model":' + JSON.stringify(model) + ',"max_tokens":8000,"messages":[{"role":"user","content":[' +
+    payload = '{"model":' + JSON.stringify(model) + ',"max_tokens":8000,"stream":true,"messages":[{"role":"user","content":[' +
       '{"type":"document","source":{"type":"base64","media_type":"application/pdf","data":"' + b64 + '"}},' +
       '{"type":"text","text":' + JSON.stringify(buildPrompt(false, "", true)) + '}]}]}';
   } else {
@@ -106,7 +106,7 @@ export async function onRequestPost({ request, env }) {
     if (!text.trim() && !images.length) return json(400, { error: "No contract text or pages received." });
     const parts = images.map((d) => '{"type":"image","source":{"type":"base64","media_type":"image/jpeg","data":"' + d + '"}}');
     parts.push('{"type":"text","text":' + JSON.stringify(buildPrompt(images.length > 0, text.trim(), false)) + '}');
-    payload = '{"model":' + JSON.stringify(model) + ',"max_tokens":8000,"messages":[{"role":"user","content":[' + parts.join(",") + ']}]}';
+    payload = '{"model":' + JSON.stringify(model) + ',"max_tokens":8000,"stream":true,"messages":[{"role":"user","content":[' + parts.join(",") + ']}]}';
   }
 
   try {
@@ -122,10 +122,8 @@ export async function onRequestPost({ request, env }) {
       if (r.status === 413 || /too (large|long)|exceed/i.test(detail)) return json(413, { error: "This contract is too large to review in one pass. Try uploading it in smaller parts." });
       return json(502, { error: "The review service had a problem. Please try again." });
     }
-    const data = await r.json();
-    const out = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
-    try { return json(200, { result: parseJson(out) }); }
-    catch (e) { return json(502, { error: "The review came back unreadable. Please try again." }); }
+    // Stream the AI's answer straight through so the connection never sits idle on long contracts.
+    return new Response(r.body, { status: 200, headers: { "content-type": "text/event-stream", "cache-control": "no-cache", "x-accel-buffering": "no" } });
   } catch (err) {
     console.error(err);
     return json(500, { error: "Something went wrong. Please try again." });

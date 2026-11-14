@@ -204,15 +204,45 @@
     return { text: "", images };
   }
 
+  function parseResultText(text) {
+    const cleaned = String(text || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
+    const i = cleaned.indexOf("{"), j = cleaned.lastIndexOf("}");
+    if (i < 0 || j < 0) throw new Error("The review came back unreadable. Please retry.");
+    return JSON.parse(cleaned.slice(i, j + 1));
+  }
   async function postReview(body, headers) {
     let resp;
     try { resp = await fetch(SETTINGS.apiPath, { method: "POST", headers, body }); }
-    catch (e) { throw new Error("Connection dropped while sending the contract. Check your internet and try again."); }
-    let data = null;
-    try { data = await resp.json(); } catch (e) { data = null; }
-    if (!resp.ok) throw new Error((data && data.error) || ("The review didn't finish (error " + resp.status + "). Please try again."));
-    if (!data || !data.result) throw new Error("The review came back empty. Please try again.");
-    return data.result;
+    catch (e) { const err = new Error("The connection dropped while sending this contract."); err.retryable = true; throw err; }
+    const ctype = resp.headers.get("content-type") || "";
+    if (!resp.ok || ctype.indexOf("event-stream") < 0) {
+      let data = null; try { data = await resp.json(); } catch (e) { data = null; }
+      const err = new Error((data && data.error) || ("The review didn't finish (error " + resp.status + ")."));
+      err.retryable = resp.status >= 500 || resp.status === 429 || !data;
+      throw err;
+    }
+    // Read the streamed answer as it arrives.
+    const reader = resp.body.getReader(), dec = new TextDecoder();
+    let buf = "", text = "", streamErr = null;
+    try {
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let k;
+        while ((k = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, k).trim(); buf = buf.slice(k + 1);
+          if (line.indexOf("data:") !== 0) continue;
+          let ev; try { ev = JSON.parse(line.slice(5)); } catch (e) { continue; }
+          if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") text += ev.delta.text;
+          else if (ev.type === "error") streamErr = (ev.error && ev.error.message) || "The review service had a problem.";
+        }
+      }
+    } catch (e) { const err = new Error("The connection dropped while reading this contract."); err.retryable = true; throw err; }
+    if (streamErr) { const err = new Error(streamErr); err.retryable = true; throw err; }
+    if (!text.trim()) { const err = new Error("The review came back empty."); err.retryable = true; throw err; }
+    try { return parseResultText(text); }
+    catch (e) { const err = new Error("The review came back unreadable."); err.retryable = true; throw err; }
   }
 
   async function analyzeJob(job) {
@@ -234,6 +264,28 @@
     return postReview(JSON.stringify({ text: text.slice(0, 180000), images }), { "content-type": "application/json" });
   }
 
+  async function runOne(c) {
+    c.status = "running"; c.error = ""; renderCard(c);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try { c.result = await analyzeJob(c.job); c.inp = inpFromResult(c.result); c.status = "done"; break; }
+      catch (err) {
+        c.status = "error"; c.error = (err && err.message) || "Something went wrong with this contract.";
+        if (!(err && err.retryable) || attempt === 1) break;
+        c.status = "running"; renderCard(c);
+        await new Promise((res) => setTimeout(res, 2000));
+      }
+    }
+    renderCard(c); renderStack();
+    if (c.status === "done" && unlocked) shareReport(c);
+  }
+  function retryContract(c) {
+    setStatus("Retrying " + c.name + "…", false, true);
+    runOne(c).then(() => {
+      const failed = contracts.filter((x) => x.status === "error").length;
+      setStatus(c.status === "done" ? "Done." : "Still couldn't read " + c.name + ". Try again in a minute or upload a clearer copy.", c.status !== "done" && failed > 0);
+    });
+  }
+
   analyzeBtn.addEventListener("click", async () => {
     const jobs = [];
     files.filter((f) => /pdf$/i.test(f.type)).forEach((f) => jobs.push({ name: f.name, files: [f] }));
@@ -241,35 +293,30 @@
     if (imgs.length) jobs.push({ name: "Photos (" + imgs.length + " page" + (imgs.length > 1 ? "s" : "") + ")", files: imgs });
     if (!jobs.length) return;
 
-    contracts = []; cardsEl.innerHTML = ""; stackEl.innerHTML = ""; stackEl.classList.add("hidden"); unlockEl.classList.add("hidden");
+    // Add to what's already on screen; only clear the sample report.
+    if (contracts.some((c) => c.id === "sample")) { contracts = []; cardsEl.innerHTML = ""; }
+    const room = MAX_CONTRACTS - contracts.length;
+    if (room <= 0) { setStatus("You can check up to " + MAX_CONTRACTS + " contracts at a time. Reload the page to start over.", true); return; }
+    const batchJobs = jobs.slice(0, room);
     $("sampleNote").classList.add("hidden");
     resultsWrap.classList.remove("hidden");
-    jobs.forEach((j) => {
+    const batch = batchJobs.map((j) => {
       const c = { id: Math.random().toString(36).slice(2), name: j.name, status: "pending", job: j, lead: unlockedLead, node: el("article", "panel contract contract-card") };
-      cardsEl.appendChild(c.node); renderCard(c); contracts.push(c);
+      cardsEl.appendChild(c.node); renderCard(c); contracts.push(c); return c;
     });
     files = []; renderFiles(); refreshButton();
     analyzeBtn.disabled = true;
-    resultsWrap.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    batch[0].node.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 
     const started = Date.now(); let done = 0;
-    const tick = () => setStatus("Reviewing " + jobs.length + " contract" + (jobs.length > 1 ? "s" : "") + "… " + done + " of " + jobs.length + " done", false, true);
+    const tick = () => setStatus("Reviewing " + batch.length + " contract" + (batch.length > 1 ? "s" : "") + "… " + done + " of " + batch.length + " done", false, true);
     tick(); const timer = setInterval(tick, 1000);
-    const queue = contracts.slice();
-    async function worker() {
-      while (queue.length) {
-        const c = queue.shift();
-        c.status = "running"; renderCard(c);
-        try { c.result = await analyzeJob(c.job); c.inp = inpFromResult(c.result); c.status = "done"; }
-        catch (err) { c.status = "error"; c.error = (err && err.message) || "Something went wrong with this contract."; }
-        done++; renderCard(c); renderStack();
-        if (c.status === "done" && unlocked) shareReport(c);
-      }
-    }
+    const queue = batch.slice();
+    async function worker() { while (queue.length) { const c = queue.shift(); await runOne(c); done++; } }
     await Promise.all([worker(), worker()]);
     clearInterval(timer);
-    const failed = contracts.filter((c) => c.status === "error").length;
-    setStatus("Finished in " + Math.round((Date.now() - started) / 1000) + "s" + (failed ? " · " + failed + " couldn't be read" : "") + ".", failed > 0);
+    const failed = batch.filter((c) => c.status === "error").length;
+    setStatus("Finished in " + Math.round((Date.now() - started) / 1000) + "s" + (failed ? " · " + failed + " couldn't be read. Tap Retry on " + (failed > 1 ? "them" : "it") + "." : "") + (jobs.length > batchJobs.length ? " Only " + MAX_CONTRACTS + " contracts fit at once." : ""), failed > 0);
     refreshButton();
   });
 
@@ -332,10 +379,15 @@
     const n = c.node; n.innerHTML = "";
     if (c.status === "pending" || c.status === "running") {
       n.append(el("div", "file-tag", c.name));
-      const p = el("p", "placeholder"); p.append(el("span", "spinner"), document.createTextNode(c.status === "pending" ? "Waiting in line…" : "Reading every page of your contract. Long contracts can take 1 to 2 minutes."));
+      const p = el("p", "placeholder"); p.append(el("span", "spinner"), document.createTextNode(c.status === "pending" ? "Waiting in line…" : c.error ? "Connection hiccup. Trying again…" : "Reading every page of your contract. Long contracts can take 1 to 2 minutes."));
       n.append(p); return;
     }
-    if (c.status === "error") { n.append(el("div", "file-tag", c.name), el("p", "err", c.error)); return; }
+    if (c.status === "error") {
+      n.append(el("div", "file-tag", c.name), el("p", "err", c.error));
+      const rb = el("button", "secondary", "Retry this contract"); rb.type = "button";
+      rb.addEventListener("click", () => retryContract(c));
+      n.append(rb); return;
+    }
     const r = c.result, inp = c.inp;
     if (!unlocked && c.id !== "sample") { renderTeaser(c); return; }
 
