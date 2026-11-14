@@ -69,16 +69,28 @@
     statusEl.classList.toggle("error", !!isError);
   }
   const leadName = $("leadName"), leadPhone = $("leadPhone"), leadEmail = $("leadEmail");
-  const SHARE_TEXT = document.getElementById("agreeText").textContent.replace(/\s+/g, " ").trim();
+  const SHARE_TEXT = (document.getElementById("agreeText").textContent + " " + document.getElementById("fineText").textContent).replace(/\s+/g, " ").trim();
+  const unlockEl = $("unlock"), unlockBtn = $("unlockBtn");
+  let unlocked = false, unlockedLead = null;
   function lead() {
     return { name: leadName.value.trim(), phone: leadPhone.value.trim(), email: leadEmail.value.trim(), consent_share: agree.checked, consent_contact: agree.checked };
   }
   function leadReady() { const l = lead(); return l.name.length > 1 && l.phone.replace(/\D/g, "").length >= 10 && l.consent_share; }
   function refreshButton() {
-    analyzeBtn.disabled = files.length === 0 || !leadReady();
-    const hint = $("formHint");
-    if (hint) hint.textContent = files.length && !leadReady() ? "Add your name and mobile number, and check the box to continue." : "";
+    analyzeBtn.disabled = files.length === 0;
+    unlockBtn.disabled = !leadReady();
+    const l = lead(), hint = $("unlockHint");
+    const touched = l.name || l.phone || l.consent_share;
+    hint.textContent = touched && !leadReady() ? "Add your name and mobile number, and check the box to unlock." : "";
   }
+  unlockBtn.addEventListener("click", () => {
+    if (!leadReady()) return;
+    unlocked = true; unlockedLead = lead();
+    unlockEl.classList.add("hidden");
+    contracts.forEach((c) => { c.lead = unlockedLead; renderCard(c); if (c.status === "done") shareReport(c); });
+    renderStack();
+    stackEl.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  });
   function renderFiles() {
     fileList.innerHTML = "";
     files.forEach((f, i) => {
@@ -229,12 +241,11 @@
     if (imgs.length) jobs.push({ name: "Photos (" + imgs.length + " page" + (imgs.length > 1 ? "s" : "") + ")", files: imgs });
     if (!jobs.length) return;
 
-    const leadInfo = lead();
-    contracts = []; cardsEl.innerHTML = ""; stackEl.innerHTML = ""; stackEl.classList.add("hidden");
+    contracts = []; cardsEl.innerHTML = ""; stackEl.innerHTML = ""; stackEl.classList.add("hidden"); unlockEl.classList.add("hidden");
     $("sampleNote").classList.add("hidden");
     resultsWrap.classList.remove("hidden");
     jobs.forEach((j) => {
-      const c = { id: Math.random().toString(36).slice(2), name: j.name, status: "pending", job: j, lead: leadInfo, node: el("article", "panel contract contract-card") };
+      const c = { id: Math.random().toString(36).slice(2), name: j.name, status: "pending", job: j, lead: unlockedLead, node: el("article", "panel contract contract-card") };
       cardsEl.appendChild(c.node); renderCard(c); contracts.push(c);
     });
     files = []; renderFiles(); refreshButton();
@@ -252,7 +263,7 @@
         try { c.result = await analyzeJob(c.job); c.inp = inpFromResult(c.result); c.status = "done"; }
         catch (err) { c.status = "error"; c.error = (err && err.message) || "Something went wrong with this contract."; }
         done++; renderCard(c); renderStack();
-        if (c.status === "done") shareReport(c);
+        if (c.status === "done" && unlocked) shareReport(c);
       }
     }
     await Promise.all([worker(), worker()]);
@@ -326,6 +337,7 @@
     }
     if (c.status === "error") { n.append(el("div", "file-tag", c.name), el("p", "err", c.error)); return; }
     const r = c.result, inp = c.inp;
+    if (!unlocked && c.id !== "sample") { renderTeaser(c); return; }
 
     const head = el("div", "head-row");
     const tw = el("div");
@@ -407,6 +419,29 @@
     recalcCard(c);
   }
 
+  function renderTeaser(c) {
+    const n = c.node, r = c.result, m = SCHED.metrics(c.inp, asOf);
+    c.metrics = m;
+    const highs = (r.clauses || []).filter((x) => x.risk === "high").length;
+    const tw = el("div");
+    tw.append(el("div", "file-tag", c.name), el("h2", null, (r.parties && r.parties.funder) || "Your agreement"));
+    n.append(tw);
+    const stated = num(r.stated_apr);
+    const tiles = el("div", "tiles");
+    tiles.append(
+      tile("Still owed today", m.pays ? usd(m.owed) : "—", m.pays ? "if every payment cleared" : null, m.pays && m.owed > 0),
+      tile(stated ? "APR" : "Estimated APR", stated ? (Math.round(stated * 10) / 10) + "%" : (m.apr ? Math.round(m.apr) + "%" : "—"), null, (stated || m.apr || 0) >= 60),
+      tile("Terms that could hurt you", String(highs), null, highs > 0)
+    );
+    n.append(tiles);
+    const lk = el("div", "locked");
+    lk.append(el("strong", null, "Unlock to see the rest of your report:"),
+      el("span", null, "Your payoff date and upcoming payments"),
+      el("span", null, "Every contract term explained in plain English"),
+      el("span", null, "Red flags and options to look into"));
+    n.append(lk);
+  }
+
   function recalcCard(c) {
     if (c.status !== "done" || !c.calcEl) return;
     const inp = c.inp, r = c.result, m = SCHED.metrics(inp, asOf);
@@ -470,15 +505,17 @@
       if (m.pays) { owed += m.owed; if (!latest || m.payoff > latest) latest = m.payoff; }
       highs += (c.result.clauses || []).filter((x) => x.risk === "high").length;
     });
-    stackEl.append(el("h2", null, done.length > 1 ? "Your " + done.length + " advances together" : "Your advance at a glance"));
+    stackEl.append(el("h2", null, done.length > 1 ? "Your " + done.length + " agreements together" : "Your agreement at a glance"));
     const tiles = el("div", "tiles"); tiles.style.marginTop = "12px";
     tiles.append(
       tile("Paying each week", usd(weekly), "daily payments counted as 5 days"),
       tile("Still owed today", usd(owed), null, owed > 0),
-      tile("Last one paid off", latest ? fmtShort(latest) : "—"),
       tile("High-risk terms", String(highs), null, highs > 0)
     );
+    if (unlocked || done.every((c) => c.id === "sample")) tiles.insertBefore(tile("Last one paid off", latest ? fmtShort(latest) : "—"), tiles.lastChild);
     stackEl.append(tiles);
+    const isSampleOnly = done.every((c) => c.id === "sample");
+    if (!unlocked && !isSampleOnly) { unlockEl.classList.remove("hidden"); return; }
     const cta = el("div", "cta-row");
     cta.append(el("p", null, "Want someone to look at options for lowering these payments? It's free and there's no obligation."));
     const btn = el("button", "primary inline", "Request my free consultation");
@@ -519,7 +556,7 @@
       summary: "Sample report. You received about $47,000 and will pay back $74,500 at $745 every business day. Your contract lets you ask for payments based on your actual sales.",
       confidence_note: "This is a sample, not your contract."
     };
-    contracts = []; cardsEl.innerHTML = "";
+    contracts = []; cardsEl.innerHTML = ""; unlockEl.classList.add("hidden");
     const c = { id: "sample", name: "sample-contract.pdf", status: "done", result: ex, inp: inpFromResult(ex), node: el("article", "panel contract contract-card") };
     contracts.push(c); cardsEl.appendChild(c.node); renderCard(c); renderStack();
     resultsWrap.classList.remove("hidden"); $("sampleNote").classList.remove("hidden");
