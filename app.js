@@ -160,10 +160,10 @@
     const url = URL.createObjectURL(file);
     try {
       const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
-      const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const scale = Math.min(1, 2000 / Math.max(img.width, img.height));
       const c = document.createElement("canvas"); c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      return await canvasJpeg(c, 0.72);
+      return await canvasJpeg(c, 0.85);
     } finally { URL.revokeObjectURL(url); }
   }
   async function readPdf(file) {
@@ -182,32 +182,44 @@
     const images = [];
     for (let p = 1; p <= Math.min(pdf.numPages, 15); p++) {
       const page = await pdf.getPage(p);
-      const viewport = page.getViewport({ scale: 1.3 });
+      const viewport = page.getViewport({ scale: 2 });
       const canvas = document.createElement("canvas");
       canvas.width = viewport.width; canvas.height = viewport.height;
       await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
-      const blob = await canvasJpeg(canvas, 0.7);
+      const blob = await canvasJpeg(canvas, 0.82);
       if (blob) images.push(blob);
     }
     return { text: "", images };
   }
 
+  async function postReview(body, headers) {
+    let resp;
+    try { resp = await fetch(SETTINGS.apiPath, { method: "POST", headers, body }); }
+    catch (e) { throw new Error("Connection dropped while sending the contract. Check your internet and try again."); }
+    let data = null;
+    try { data = await resp.json(); } catch (e) { data = null; }
+    if (!resp.ok) throw new Error((data && data.error) || ("The review didn't finish (error " + resp.status + "). Please try again."));
+    if (!data || !data.result) throw new Error("The review came back empty. Please try again.");
+    return data.result;
+  }
+
   async function analyzeJob(job) {
+    // A PDF goes to the AI whole, so it reads the real text and every page image, fine print included.
+    if (job.files.length === 1 && /pdf$/i.test(job.files[0].type) && job.files[0].size <= 20000000) {
+      const b64 = await blobToB64(job.files[0]);
+      return postReview(b64, { "content-type": "text/plain", "x-doc-type": "pdf" });
+    }
+    // Photos (or a very large PDF): send sharp page images.
     let text = "", blobs = [];
     for (const f of job.files) {
       if (/pdf$/i.test(f.type)) { const r = await readPdf(f); text += r.text; blobs = blobs.concat(r.images); }
       else if (/^image\//.test(f.type) && blobs.length < 15) blobs.push(await imageFileToJpeg(f));
     }
     if (!text.trim() && !blobs.length) throw new Error("We couldn't read this file. Try a clearer PDF or photos of each page.");
-    let images = [];
+    const images = [];
     let total = 0;
-    for (const b of blobs) { const s = await blobToB64(b); if (total + s.length > 3800000) break; images.push(s); total += s.length; }
-    const resp = await fetch(SETTINGS.apiPath, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: text.slice(0, 180000), images }) });
-    let data = null;
-    try { data = await resp.json(); } catch (e) { data = null; }
-    if (!resp.ok) throw new Error((data && data.error) || "The review didn't finish. Please try again.");
-    if (!data || !data.result) throw new Error("The review came back empty. Please try again.");
-    return data.result;
+    for (const b of blobs) { const s = await blobToB64(b); if (total + s.length > 9000000) break; images.push(s); total += s.length; }
+    return postReview(JSON.stringify({ text: text.slice(0, 180000), images }), { "content-type": "application/json" });
   }
 
   analyzeBtn.addEventListener("click", async () => {
@@ -309,7 +321,7 @@
     const n = c.node; n.innerHTML = "";
     if (c.status === "pending" || c.status === "running") {
       n.append(el("div", "file-tag", c.name));
-      const p = el("p", "placeholder"); p.append(el("span", "spinner"), document.createTextNode(c.status === "pending" ? "Waiting in line…" : "Reading your contract. This usually takes under a minute."));
+      const p = el("p", "placeholder"); p.append(el("span", "spinner"), document.createTextNode(c.status === "pending" ? "Waiting in line…" : "Reading every page of your contract. Long contracts can take 1 to 2 minutes."));
       n.append(p); return;
     }
     if (c.status === "error") { n.append(el("div", "file-tag", c.name), el("p", "err", c.error)); return; }
