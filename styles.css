@@ -194,3 +194,37 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
 .locked { margin: 0; padding: 12px 14px; border: 1px dashed var(--rule); border-radius: 8px; color: var(--muted); font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
 .locked strong { color: var(--ink); }
 .fine a { color: var(--accent); }
+
+/* Debt health report: a medical chart for the preview */
+.health { border-top: 4px solid var(--hc, var(--accent)); display: flex; flex-direction: column; gap: 16px; }
+.health-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; border-bottom: 1px dashed var(--rule); padding-bottom: 10px; }
+.health-head h2 { margin: 0; display: flex; align-items: center; gap: 8px; }
+.health-head .chart-meta { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.health-top { display: grid; grid-template-columns: 170px 1fr; gap: 18px; align-items: center; }
+@media (max-width: 640px) { .health-top { grid-template-columns: 1fr; } }
+.grade { width: 150px; height: 150px; border-radius: 50%; border: 6px solid var(--hc); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; background: var(--sheet); }
+.grade .letter { font-family: var(--display); font-weight: 700; font-size: 72px; line-height: 1; color: var(--hc); }
+.grade .gl { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.diag h3 { margin: 0 0 4px; }
+.diag .dx { font-family: var(--display); font-size: 22px; font-weight: 700; color: var(--hc); margin: 0 0 6px; text-wrap: balance; }
+.diag p { margin: 0; max-width: 56ch; }
+.rev-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.rev-row input { width: 140px; font: 500 14px var(--mono); padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); }
+.vitals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 760px) { .vitals { grid-template-columns: 1fr; } }
+.vital { background: #0e1a1c; color: #d8f3ef; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; min-height: 170px; }
+.vital .vt { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8fb3ae; display: flex; justify-content: space-between; }
+.vital .vv { font-family: var(--mono); font-size: 28px; font-weight: 500; line-height: 1; color: var(--vc, #39ff8a); }
+.vital .vv small { font-size: 13px; color: #8fb3ae; margin-left: 4px; }
+.vital .vn { font-size: 12.5px; color: #cfe5e1; }
+.vital svg { width: 100%; height: 70px; display: block; }
+.ekg-line { fill: none; stroke: var(--vc, #39ff8a); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 3px var(--vc, #39ff8a)); }
+.ekg-anim { animation: ekg var(--beat, 1s) linear infinite; }
+@keyframes ekg { from { transform: translateX(0); } to { transform: translateX(-60px); } }
+.blink { animation: blink var(--beat, 1s) ease-in-out infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .ekg-anim, .blink { animation: none; } }
+.health-note { font-size: 12px; color: var(--muted); margin: 0; }
+.stack.health-wrap { border-top: 1px solid var(--rule); }
+.vital .vt { align-items: center; }
+.vital .lvl { color: var(--vc); border: 1px solid var(--vc); border-radius: 999px; padding: 2px 9px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; }

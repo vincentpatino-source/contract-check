@@ -492,12 +492,125 @@
     }
   }
 
+  // ---------- Debt health report (the preview) ----------
+  let revenueOverride = null;
+  const MONTHLY = { daily: 21.67, weekly: 4.333, biweekly: 2.167, monthly: 1 };
+  const GRADES = [
+    { max: 0.075, g: "A", color: "#2f9a5a", dx: "Healthy", text: "Your payments take a small share of your revenue. Your business has room to breathe." },
+    { max: 0.15, g: "B", color: "#5c9a2f", dx: "Stable", text: "Payments are manageable, but keep an eye on adding more financing." },
+    { max: 0.25, g: "C", color: "#c58a0a", dx: "Strained", text: "About a fifth of your revenue goes to payments. One slow month can make this tight." },
+    { max: 0.40, g: "D", color: "#d9661f", dx: "Serious", text: "Payments are taking a large bite out of your revenue. This is where businesses start falling behind." },
+    { max: Infinity, g: "F", color: "#c62828", dx: "Critical", text: "Payments are eating a dangerous share of your revenue. Many businesses at this level are at risk of default." }
+  ];
+  function healthData(done) {
+    let monthly = 0, owed = 0, aprW = 0, aprBase = 0, highs = 0, revenue = null, revSrc = "", revDate = "";
+    done.forEach((c) => {
+      const m = c.metrics || SCHED.metrics(c.inp, asOf), r = c.result;
+      const active = !m.pays || m.owed > 0;
+      if (active && c.inp.pmt && MONTHLY[c.inp.freq]) monthly += c.inp.pmt * MONTHLY[c.inp.freq];
+      if (m.pays) owed += m.owed;
+      const apr = num(r.stated_apr) || m.apr;
+      if (apr && m.pays && m.owed > 0) { aprW += apr * m.owed; aprBase += m.owed; }
+      highs += (r.clauses || []).filter((x) => x.risk === "high").length;
+      const rev = num(r.stated_monthly_revenue);
+      if (rev && rev > 0 && (!revDate || (c.inp.signed || "") > revDate)) { revenue = rev; revDate = c.inp.signed || "0"; revSrc = (r.parties && r.parties.funder) || c.name; }
+    });
+    const rev = revenueOverride || revenue;
+    const ratio = rev ? monthly / rev : null;
+    const grade = ratio == null ? null : GRADES.find((x) => ratio < x.max);
+    return { monthly, owed, apr: aprBase ? aprW / aprBase : null, highs, revenue: rev, revSrc: revenueOverride ? "you" : revSrc, ratio, grade };
+  }
+  function svgEl(tag, attrs) { const e = document.createElementNS("http://www.w3.org/2000/svg", tag); Object.keys(attrs || {}).forEach((k) => e.setAttribute(k, attrs[k])); return e; }
+  function vital(title, value, unit, note, color, drawing, level) {
+    const v = el("div", "vital"); v.style.setProperty("--vc", color);
+    const t = el("div", "vt"); t.append(el("span", null, title));
+    if (level) t.append(el("span", "lvl", level));
+    v.append(t, drawing);
+    const vv = el("div", "vv", value); if (unit) vv.append(el("small", null, unit));
+    v.append(vv, el("div", "vn", note));
+    return v;
+  }
+  function ekg(bpm, color) {
+    const svg = svgEl("svg", { viewBox: "0 0 240 70", preserveAspectRatio: "none", "aria-hidden": "true" });
+    let d = "M0 40";
+    for (let x = 0; x < 300; x += 60) d += " L" + (x + 18) + " 40 L" + (x + 22) + " 34 L" + (x + 26) + " 40 L" + (x + 30) + " 40 L" + (x + 33) + " 50 L" + (x + 37) + " 8 L" + (x + 41) + " 58 L" + (x + 45) + " 40 L" + (x + 50) + " 40 L" + (x + 55) + " 32 L" + (x + 60) + " 40";
+    const g = svgEl("g", { class: "ekg-anim" }); g.style.setProperty("--beat", (60 / bpm).toFixed(2) + "s");
+    g.append(svgEl("path", { d, class: "ekg-line" })); svg.append(g);
+    return svg;
+  }
+  function thermo(tempF, color) {
+    const svg = svgEl("svg", { viewBox: "0 0 240 70", "aria-hidden": "true" });
+    const pct = Math.max(0.08, Math.min(1, (tempF - 97) / 8));
+    svg.append(svgEl("rect", { x: 20, y: 26, width: 190, height: 16, rx: 8, fill: "#22383b" }));
+    svg.append(svgEl("rect", { x: 20, y: 26, width: Math.max(18, 190 * pct), height: 16, rx: 8, fill: color }));
+    svg.append(svgEl("circle", { cx: 22, cy: 34, r: 15, fill: color }));
+    for (let i = 0; i <= 8; i++) svg.append(svgEl("line", { x1: 40 + i * 21, x2: 40 + i * 21, y1: 48, y2: 54, stroke: "#4d6b6e", "stroke-width": 1.5 }));
+    return svg;
+  }
+  function gauge(frac, color) {
+    const svg = svgEl("svg", { viewBox: "0 0 240 70", "aria-hidden": "true" });
+    const cx = 120, cy = 66, r = 54, a0 = Math.PI, ang = a0 - Math.PI * Math.max(0, Math.min(1, frac));
+    const arc = (from, to, col) => { const x1 = cx + r * Math.cos(from), y1 = cy - r * Math.sin(from), x2 = cx + r * Math.cos(to), y2 = cy - r * Math.sin(to); svg.append(svgEl("path", { d: "M" + x1 + " " + y1 + " A" + r + " " + r + " 0 0 1 " + x2 + " " + y2, stroke: col, "stroke-width": 10, fill: "none" })); };
+    arc(Math.PI, Math.PI * 2 / 3, "#2f9a5a"); arc(Math.PI * 2 / 3, Math.PI / 3, "#c58a0a"); arc(Math.PI / 3, 0.001, "#c62828");
+    svg.append(svgEl("line", { x1: cx, y1: cy, x2: cx + (r - 6) * Math.cos(ang), y2: cy - (r - 6) * Math.sin(ang), stroke: "#ffffff", "stroke-width": 3, "stroke-linecap": "round" }));
+    svg.append(svgEl("circle", { cx, cy, r: 5, fill: "#ffffff" }));
+    return svg;
+  }
+  function renderHealth(done) {
+    const h = healthData(done), gr = h.grade;
+    const col = gr ? gr.color : "#5d6870";
+    const box = el("div", "health"); box.style.setProperty("--hc", col);
+    const head = el("div", "health-head");
+    const title = el("h2"); title.append(document.createTextNode("Debt Health Report"));
+    const merchant = (done.find((c) => c.result.parties && c.result.parties.merchant) || { result: { parties: {} } }).result.parties.merchant;
+    head.append(title, el("span", "chart-meta", (merchant ? merchant + " · " : "") + done.length + " agreement" + (done.length > 1 ? "s" : "") + " · " + fmtShort(asOf)));
+    box.append(head);
+
+    const top = el("div", "health-top");
+    const g = el("div", "grade"); g.append(el("div", "letter", gr ? gr.g : "?"), el("div", "gl", "Debt grade"));
+    const dg = el("div", "diag");
+    dg.append(el("h3", null, "Diagnosis"));
+    if (gr) {
+      dg.append(el("p", "dx", gr.dx + ": payments are " + Math.round(h.ratio * 100) + "% of your monthly revenue"), el("p", null, gr.text));
+    } else {
+      dg.append(el("p", "dx", "We need your monthly sales to grade this"), el("p", null, "Your contracts didn't list your revenue. Enter your average monthly sales to see your grade."));
+    }
+    const rr = el("div", "rev-row");
+    rr.append(el("span", null, h.revenue ? "Monthly revenue used: " + usd(h.revenue) + (h.revSrc === "you" ? " (you entered)" : h.revSrc ? " (from your " + h.revSrc + " agreement)" : "") + ". Not right?" : "Monthly sales:"));
+    const inp = document.createElement("input"); inp.type = "number"; inp.min = "0"; inp.inputMode = "decimal"; inp.placeholder = "e.g. 80000"; inp.id = "revInput"; inp.setAttribute("aria-label", "Average monthly sales");
+    if (revenueOverride) inp.value = revenueOverride;
+    inp.addEventListener("change", () => { const v = num(inp.value); revenueOverride = v && v > 0 ? v : null; renderStack(); });
+    rr.append(inp);
+    dg.append(rr);
+    top.append(g, dg);
+    box.append(top);
+
+    const ratioPct = h.ratio != null ? h.ratio * 100 : null;
+    const bpm = ratioPct != null ? Math.min(190, Math.round(62 + ratioPct * 2)) : 80;
+    const bpmCol = !gr ? "#8fb3ae" : gr.g <= "B" ? "#39ff8a" : gr.g === "C" ? "#ffd23f" : "#ff5a4f";
+    const temp = h.apr ? Math.min(105.5, 98.6 + h.apr / 50) : 98.6;
+    const tCol = !h.apr ? "#8fb3ae" : h.apr < 30 ? "#39ff8a" : h.apr < 80 ? "#ffd23f" : "#ff5a4f";
+    const sys = Math.min(200, 115 + h.highs * 12), dia = Math.min(120, 75 + h.highs * 7);
+    const bpCol = h.highs <= 1 ? "#39ff8a" : h.highs <= 3 ? "#ffd23f" : "#ff5a4f";
+    const vitals = el("div", "vitals");
+    vitals.append(
+      vital("Payment pressure", ratioPct != null ? Math.round(ratioPct) + "%" : "--", "of revenue", usd(h.monthly) + "/mo in payments", bpmCol, ekg(bpm, bpmCol), ratioPct == null ? "" : ratioPct < 15 ? "Low" : ratioPct < 25 ? "Elevated" : ratioPct < 40 ? "High" : "Critical"),
+      vital("Cost of money", h.apr ? Math.round(h.apr) + "%" : "--", "APR", h.apr ? (done.length > 1 ? "Average across your agreements" : "Yearly cost of this money") : "APR not available", tCol, thermo(temp, tCol), !h.apr ? "" : h.apr < 30 ? "Low" : h.apr < 80 ? "Elevated" : h.apr < 150 ? "High" : "Critical"),
+      vital("Contract risk", String(h.highs), "high-risk term" + (h.highs === 1 ? "" : "s"), "Terms in your contract" + (done.length > 1 ? "s" : "") + " that could hurt you", bpCol, gauge(h.highs / 6, bpCol), h.highs <= 1 ? "Low" : h.highs <= 3 ? "Elevated" : "High")
+    );
+    box.append(vitals);
+    box.append(el("p", "health-note", "Vitals are a visual way to show your real numbers. Balance still owed today: " + usd(h.owed) + "."));
+    return box;
+  }
+
   // ---------- Combined + call to action ----------
   function renderStack() {
     const done = contracts.filter((c) => c.status === "done");
     stackEl.innerHTML = "";
     if (!done.length) { stackEl.classList.add("hidden"); return; }
     stackEl.classList.remove("hidden");
+    stackEl.classList.add("health-wrap");
+    stackEl.append(renderHealth(done));
     let weekly = 0, owed = 0, latest = null, highs = 0;
     done.forEach((c) => {
       const m = c.metrics || SCHED.metrics(c.inp, asOf);
@@ -505,17 +618,11 @@
       if (m.pays) { owed += m.owed; if (!latest || m.payoff > latest) latest = m.payoff; }
       highs += (c.result.clauses || []).filter((x) => x.risk === "high").length;
     });
-    stackEl.append(el("h2", null, done.length > 1 ? "Your " + done.length + " agreements together" : "Your agreement at a glance"));
-    const tiles = el("div", "tiles"); tiles.style.marginTop = "12px";
-    tiles.append(
-      tile("Paying each week", usd(weekly), "daily payments counted as 5 days"),
-      tile("Still owed today", usd(owed), null, owed > 0),
-      tile("High-risk terms", String(highs), null, highs > 0)
-    );
-    if (unlocked || done.every((c) => c.id === "sample")) tiles.insertBefore(tile("Last one paid off", latest ? fmtShort(latest) : "—"), tiles.lastChild);
-    stackEl.append(tiles);
     const isSampleOnly = done.every((c) => c.id === "sample");
     if (!unlocked && !isSampleOnly) { unlockEl.classList.remove("hidden"); return; }
+    const tiles = el("div", "tiles"); tiles.style.marginTop = "16px";
+    tiles.append(tile("Paying each week", usd(weekly), "daily payments counted as 5 days"), tile("Still owed today", usd(owed), null, owed > 0), tile("Last one paid off", latest ? fmtShort(latest) : "—"));
+    stackEl.append(tiles);
     const cta = el("div", "cta-row");
     cta.append(el("p", null, "Want someone to look at options for lowering these payments? It's free and there's no obligation."));
     const btn = el("button", "primary inline", "Request my free consultation");
@@ -544,6 +651,7 @@
     const ex = {
       is_mca_contract: true, parties: { merchant: "Sample Restaurant LLC", funder: "Sample Funding Group" },
       contract_type: "receivables_purchase", funding_structure: "lump_sum", signed_date: "2026-10-23",
+      stated_monthly_revenue: 90000,
       money: { purchase_price: 50000, purchased_amount: 74500, factor_rate: 1.49, upfront_fees: [{ name: "Origination", amount: 2995 }], net_funded: 47005, payment_amount: 745, payment_frequency: "daily" },
       clauses: [
         { key: "reconciliation", found: true, summary: "You can ask every month for your payment to be adjusted to 12% of your actual sales.", quote: "", page: 3, risk: "low" },
