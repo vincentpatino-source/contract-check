@@ -68,17 +68,16 @@
     statusEl.appendChild(document.createTextNode(msg || ""));
     statusEl.classList.toggle("error", !!isError);
   }
-  const leadName = $("leadName"), leadPhone = $("leadPhone"), leadEmail = $("leadEmail"), contactOk = $("contactOk");
+  const leadName = $("leadName"), leadPhone = $("leadPhone"), leadEmail = $("leadEmail");
   const SHARE_TEXT = document.getElementById("agreeText").textContent.replace(/\s+/g, " ").trim();
-  const CONTACT_TEXT = document.getElementById("contactText").textContent.replace(/\s+/g, " ").trim();
   function lead() {
-    return { name: leadName.value.trim(), phone: leadPhone.value.trim(), email: leadEmail.value.trim(), consent_share: agree.checked, consent_contact: contactOk.checked };
+    return { name: leadName.value.trim(), phone: leadPhone.value.trim(), email: leadEmail.value.trim(), consent_share: agree.checked, consent_contact: agree.checked };
   }
-  function leadReady() { const l = lead(); return l.name.length > 1 && (l.phone.replace(/\D/g, "").length >= 10 || /.+@.+\..+/.test(l.email)) && l.consent_share; }
+  function leadReady() { const l = lead(); return l.name.length > 1 && l.phone.replace(/\D/g, "").length >= 10 && l.consent_share; }
   function refreshButton() {
     analyzeBtn.disabled = files.length === 0 || !leadReady();
     const hint = $("formHint");
-    if (hint) hint.textContent = files.length && !leadReady() ? "Add your name, a phone or email, and check the first box to continue." : "";
+    if (hint) hint.textContent = files.length && !leadReady() ? "Add your name and mobile number, and check the box to continue." : "";
   }
   function renderFiles() {
     fileList.innerHTML = "";
@@ -102,7 +101,7 @@
   ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
   ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", (e) => { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
-  [agree, contactOk].forEach((x) => x.addEventListener("change", refreshButton));
+  agree.addEventListener("change", refreshButton);
   [leadName, leadPhone, leadEmail].forEach((x) => x.addEventListener("input", refreshButton));
 
   // ---------- Copy of each report to DebtMedx ----------
@@ -136,7 +135,7 @@
     return sendToOwner(Object.assign({}, l, {
       type: "report",
       consent_share_text: SHARE_TEXT,
-      consent_contact_text: l.consent_contact ? CONTACT_TEXT : "",
+      consent_contact_text: "",
       submitted_at: new Date().toISOString(),
       page: location.href,
       file_name: c.name,
@@ -477,7 +476,7 @@
       const l = done[0].lead;
       const ok = await sendToOwner(Object.assign({}, l, {
         type: "consultation_request", submitted_at: new Date().toISOString(), page: location.href,
-        consent_share_text: SHARE_TEXT, consent_contact_text: l.consent_contact ? CONTACT_TEXT : "",
+        consent_share_text: SHARE_TEXT, consent_contact_text: "",
         funder: done.map((c) => (c.result.parties && c.result.parties.funder) || "unknown").join("; "),
         owed: Math.round(owed), summary: "Weekly payments " + usd(weekly) + " across " + done.length + " advance(s); " + highs + " high-risk terms.",
         report_text: done.map(reportText).join("\n\n----------\n\n"), files: []
