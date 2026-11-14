@@ -94,13 +94,13 @@ export async function onRequestPost({ request, env }) {
     // Body is the PDF as base64 text. Build the API request by string, so the large file is never parsed.
     const b64 = (await request.text()).trim();
     if (b64.length > 30000000) return json(413, { error: "This PDF is too large. Try a smaller file or photos of the pages." });
-    if (!safeB64(b64)) return json(400, { error: "Couldn't read the upload. Please try again." });
+    if (!safeB64(b64)) return json(400, { error: "Couldn't read the upload." });
     payload = '{"model":' + JSON.stringify(model) + ',"max_tokens":8000,"stream":true,"messages":[{"role":"user","content":[' +
       '{"type":"document","source":{"type":"base64","media_type":"application/pdf","data":"' + b64 + '"}},' +
       '{"type":"text","text":' + JSON.stringify(buildPrompt(false, "", true)) + '}]}]}';
   } else {
     let body;
-    try { body = await request.json(); } catch (e) { return json(400, { error: "Couldn't read the upload. Please try again." }); }
+    try { body = await request.json(); } catch (e) { return json(400, { error: "Couldn't read the upload." }); }
     const text = typeof body.text === "string" ? body.text.slice(0, MAX_TEXT) : "";
     const images = Array.isArray(body.images) ? body.images.filter((x) => safeB64(x) && x.length <= MAX_IMAGE_B64).slice(0, MAX_IMAGES) : [];
     if (!text.trim() && !images.length) return json(400, { error: "No contract text or pages received." });
@@ -115,18 +115,18 @@ export async function onRequestPost({ request, env }) {
       headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: payload
     });
-    if (r.status === 429) return json(429, { error: "We're busy right now. Please try again in a minute." });
+    if (r.status === 429) return json(429, { error: "We're busy right now." });
     if (!r.ok) {
       const detail = (await r.text()).slice(0, 500);
       console.error("Anthropic error", r.status, detail);
       if (r.status === 413 || /too (large|long)|exceed/i.test(detail)) return json(413, { error: "This contract is too large to review in one pass. Try uploading it in smaller parts." });
-      return json(502, { error: "The review service had a problem. Please try again." });
+      return json(502, { error: "The review service had a problem." });
     }
     // Stream the AI's answer straight through so the connection never sits idle on long contracts.
     return new Response(r.body, { status: 200, headers: { "content-type": "text/event-stream", "cache-control": "no-cache", "x-accel-buffering": "no" } });
   } catch (err) {
     console.error(err);
-    return json(500, { error: "Something went wrong. Please try again." });
+    return json(500, { error: "Something went wrong." });
   }
 }
 

@@ -180,7 +180,7 @@
   }
   async function readPdf(file) {
     const lib = window.pdfjsLib;
-    if (!lib) throw new Error("The PDF reader didn't load. Reload the page and try again.");
+    if (!lib) throw new Error("The PDF reader didn't load. Reload the page.");
     lib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     const pdf = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
     let text = "";
@@ -207,7 +207,7 @@
   function parseResultText(text) {
     const cleaned = String(text || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
     const i = cleaned.indexOf("{"), j = cleaned.lastIndexOf("}");
-    if (i < 0 || j < 0) throw new Error("The review came back unreadable. Please retry.");
+    if (i < 0 || j < 0) throw new Error("The review came back unreadable.");
     return JSON.parse(cleaned.slice(i, j + 1));
   }
   async function postReview(body, headers) {
@@ -264,17 +264,20 @@
     return postReview(JSON.stringify({ text: text.slice(0, 180000), images }), { "content-type": "application/json" });
   }
 
+  // Quietly retry hiccups (up to 4 tries) so the owner never has to.
+  const RETRY_WAITS = [2000, 5000, 10000];
   async function runOne(c) {
-    c.status = "running"; c.error = ""; renderCard(c);
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try { c.result = await analyzeJob(c.job); c.inp = inpFromResult(c.result); c.status = "done"; break; }
+    c.status = "running"; c.error = ""; c.tries = 0; renderCard(c);
+    for (let attempt = 0; attempt <= RETRY_WAITS.length; attempt++) {
+      try { c.result = await analyzeJob(c.job); c.inp = inpFromResult(c.result); c.status = "done"; c.error = ""; break; }
       catch (err) {
-        c.status = "error"; c.error = (err && err.message) || "Something went wrong with this contract.";
-        if (!(err && err.retryable) || attempt === 1) break;
-        c.status = "running"; renderCard(c);
-        await new Promise((res) => setTimeout(res, 2000));
+        c.status = "error"; c.error = (err && err.message) || "We couldn't finish reading this contract.";
+        if (!(err && err.retryable) || attempt === RETRY_WAITS.length) break;
+        c.status = "running"; c.tries = attempt + 1; renderCard(c);
+        await new Promise((res) => setTimeout(res, RETRY_WAITS[attempt]));
       }
     }
+    if (c.status === "error") c.error = c.error.replace(/\s*Please (re)?try( again)?[^.]*\.?/gi, "").trim();
     renderCard(c); renderStack();
     if (c.status === "done" && unlocked) shareReport(c);
   }
@@ -282,7 +285,7 @@
     setStatus("Retrying " + c.name + "…", false, true);
     runOne(c).then(() => {
       const failed = contracts.filter((x) => x.status === "error").length;
-      setStatus(c.status === "done" ? "Done." : "Still couldn't read " + c.name + ". Try again in a minute or upload a clearer copy.", c.status !== "done" && failed > 0);
+      setStatus(c.status === "done" ? "Done." : "We still couldn't read " + c.name + ". A clearer copy usually fixes it.", c.status !== "done" && failed > 0);
     });
   }
 
@@ -316,7 +319,7 @@
     await Promise.all([worker(), worker()]);
     clearInterval(timer);
     const failed = batch.filter((c) => c.status === "error").length;
-    setStatus("Finished in " + Math.round((Date.now() - started) / 1000) + "s" + (failed ? " · " + failed + " couldn't be read. Tap Retry on " + (failed > 1 ? "them" : "it") + "." : "") + (jobs.length > batchJobs.length ? " Only " + MAX_CONTRACTS + " contracts fit at once." : ""), failed > 0);
+    setStatus("Finished in " + Math.round((Date.now() - started) / 1000) + "s" + (failed ? " · " + failed + " couldn't be read." : "") + (jobs.length > batchJobs.length ? " Only " + MAX_CONTRACTS + " contracts fit at once." : ""), failed > 0);
     refreshButton();
   });
 
@@ -379,12 +382,12 @@
     const n = c.node; n.innerHTML = "";
     if (c.status === "pending" || c.status === "running") {
       n.append(el("div", "file-tag", c.name));
-      const p = el("p", "placeholder"); p.append(el("span", "spinner"), document.createTextNode(c.status === "pending" ? "Waiting in line…" : c.error ? "Connection hiccup. Trying again…" : "Reading every page of your contract. Long contracts can take 1 to 2 minutes."));
+      const p = el("p", "placeholder"); p.append(el("span", "spinner"), document.createTextNode(c.status === "pending" ? "Waiting in line…" : c.tries ? "Still working on it…" : "Reading every page of your contract. Long contracts can take 1 to 2 minutes."));
       n.append(p); return;
     }
     if (c.status === "error") {
       n.append(el("div", "file-tag", c.name), el("p", "err", c.error));
-      const rb = el("button", "secondary", "Retry this contract"); rb.type = "button";
+      const rb = el("button", "secondary", "Read it again"); rb.type = "button";
       rb.addEventListener("click", () => retryContract(c));
       n.append(rb); return;
     }
