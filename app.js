@@ -332,12 +332,14 @@
     tw.append(el("div", "file-tag", c.name), el("h2", null, (r.parties && r.parties.funder) || "Funder not identified"));
     if (r.parties && r.parties.merchant) tw.append(el("p", "sub", r.parties.merchant));
     const pills = el("div", "pills");
-    if (inp.structure === "reverse_consolidation") pills.append(el("span", "pill medium", "Reverse consolidation"));
+    const TYPE_LABELS = { merchant_cash_advance: "Merchant cash advance", reverse_consolidation: "Reverse consolidation", term_loan: "Business term loan", line_of_credit: "Line of credit", equipment_financing: "Equipment financing", other_financing: "Business financing" };
+    const typeLabel = inp.structure === "reverse_consolidation" ? TYPE_LABELS.reverse_consolidation : TYPE_LABELS[r.agreement_type];
+    if (typeLabel) pills.append(el("span", "pill " + (inp.structure === "reverse_consolidation" ? "medium" : "neutral"), typeLabel));
     const highs = (r.clauses || []).filter((x) => x.risk === "high").length;
     pills.append(el("span", "pill " + (highs ? "high" : "low"), highs + " high-risk term" + (highs === 1 ? "" : "s")));
     head.append(tw, pills);
     n.append(head);
-    if (r.is_mca_contract === false) n.append(el("div", "banner", "This doesn't look like a merchant cash advance agreement. Check that you uploaded the right document."));
+    if (r.agreement_type === "not_financing") n.append(el("div", "banner", "This doesn't look like a financing agreement, so some numbers may be missing. Check that you uploaded the right document."));
 
     c.calcEl = el("div", "contract"); n.append(c.calcEl);
 
@@ -421,7 +423,7 @@
       tile("Payment", inp.pmt ? usd(inp.pmt) : "—", inp.freq || null),
       tile("Still owed today", m.pays ? usd(m.owed) : "—", m.pays ? "if every payment cleared" : "needs more details", m.pays && m.owed > 0),
       tile("Paid off on", m.payoff ? fmtShort(m.payoff) : "—"),
-      tile("Estimated APR", m.apr ? Math.round(m.apr) + "%" : "—", m.apr ? "yearly cost of this money" : null, m.apr && m.apr >= 60)
+      tile(num(r.stated_apr) ? "APR" : "Estimated APR", num(r.stated_apr) ? (Math.round(num(r.stated_apr) * 10) / 10) + "%" : (m.apr ? Math.round(m.apr) + "%" : "—"), num(r.stated_apr) ? "as stated in the agreement" : (m.apr ? "yearly cost of this money" : null), (num(r.stated_apr) || m.apr || 0) >= 60)
     );
     box.append(tiles);
     if (!m.pays) { box.append(el("p", "hint", "We couldn't find the full payment terms. Open \"Adjust the numbers\" below to fill them in.")); return; }

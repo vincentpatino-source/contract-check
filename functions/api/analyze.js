@@ -26,9 +26,11 @@ function limited(ip) {
 
 function buildPrompt(hasImages, contractText, isPdf) {
   return [
-    "You review merchant cash advance (MCA) agreements for small business owners. Read the contract " + (isPdf ? "PDF" : hasImages ? "page images" : "text") + " and return ONLY a JSON object, no prose, no code fences, in this shape:",
+    "You review small business financing agreements (merchant cash advances, reverse consolidations, business term loans, lines of credit, equipment financing and similar) for business owners. Read the contract " + (isPdf ? "PDF" : hasImages ? "page images" : "text") + " and return ONLY a JSON object, no prose, no code fences, in this shape:",
     "{",
     '  "is_mca_contract": boolean,',
+    '  "agreement_type": "merchant_cash_advance" | "reverse_consolidation" | "term_loan" | "line_of_credit" | "equipment_financing" | "other_financing" | "not_financing",',
+    '  "stated_apr": number|null,',
     '  "parties": {"merchant": string|null, "funder": string|null, "guarantors": [string]},',
     '  "contract_type": "receivables_purchase" | "loan" | "other" | "unclear",',
     '  "funding_structure": "lump_sum" | "reverse_consolidation" | "unclear",',
@@ -56,7 +58,9 @@ function buildPrompt(hasImages, contractText, isPdf) {
     "- red_flags: up to 5, most serious first, one plain sentence each.",
     "- owner_next_steps: 3-4 short, general, educational options written to the owner (for example, how reconciliation works if their contract has it, or questions to ask before signing another advance). Never promise outcomes, never advise stopping or skipping payments, never call anything illegal, never give legal advice.",
     "- summary: 3-5 short plain-English sentences written to the owner. confidence_note: one sentence on unreadable parts or uncertain figures.",
-    "- If this is not an MCA or financing agreement, set is_mca_contract=false and explain in summary.",
+    "- Term loans, lines of credit and other business financing are fully supported: never treat them as an error. Map their terms onto the same fields: purchase_price = loan amount or amount financed, purchased_amount = total of all scheduled payments (total repayment), upfront_fees = origination and other fees, payment_amount and payment_frequency = the scheduled loan payment. stated_apr = the APR printed in the agreement or disclosure, if any, else null. contract_type = \"loan\" for loans and credit lines.",
+    "- For loans, reconciliation and true-sale language usually don't apply: set found=false, risk=\"low\", and say \"Not applicable to loans\" in summary. Still check personal guarantees, security interests, prepayment terms, defaults, cross-default and fees.",
+    "- is_mca_contract = true only for merchant cash advances and reverse consolidations. If the document is not a financing agreement at all, set agreement_type=\"not_financing\" and explain in summary.",
     "",
     isPdf ? "The contract is attached as a PDF document." : contractText ? "CONTRACT TEXT:\n" + contractText : "The contract pages are attached as images, in order."
   ].join("\n");
