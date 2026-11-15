@@ -53,7 +53,14 @@
     }
   }
   document.querySelectorAll("[data-lead]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); openLeadForm({ entry_point: b.getAttribute("data-lead") }); }));
-  if (SETTINGS.phone) document.querySelectorAll("[data-phone]").forEach((n) => { n.textContent = SETTINGS.phone; n.closest("[data-phone-wrap]")?.classList.remove("hidden"); });
+  if (SETTINGS.phone) document.querySelectorAll("[data-phone]").forEach((n) => {
+    const m = SETTINGS.phone.match(/^(.*?)\s*\((.*)\)\s*$/);
+    if (m) {
+      const tel = el("a", "phone-link", m[1]); tel.href = "tel:" + m[2].replace(/[^0-9]/g, "");
+      n.textContent = ""; n.append(tel, el("br"), el("span", "phone-digits", m[2]));
+    } else n.textContent = SETTINGS.phone;
+    n.closest("[data-phone-wrap]")?.classList.remove("hidden");
+  });
 
   // ---------- State ----------
   const drop = $("drop"), fileInput = $("fileInput"), fileList = $("fileList");

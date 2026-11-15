@@ -355,3 +355,7 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
   .quiet-links { display: flex; flex-direction: column; gap: 8px; }
   .quiet-links .dot { display: none; }
 }
+
+.phone-line .phone-link { color: var(--ink); text-decoration: none; }
+.phone-line .phone-digits { font-weight: 500; color: var(--muted); }
+.contact p { text-wrap: balance; }
