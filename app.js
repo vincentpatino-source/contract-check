@@ -631,7 +631,7 @@
     box.append(head);
 
     const top = el("div", "health-top");
-    const g = el("div", "grade"); g.append(el("div", "letter", gr ? gr.g : "?"), el("div", "gl", "Debt grade"));
+    const g = el("div", "grade"); g.append(el("div", "letter", gr ? gr.g : "?"), el("div", "gl", "Health grade"));
     const dg = el("div", "diag");
     dg.append(el("h3", null, "Diagnosis"));
     if (gr) {
