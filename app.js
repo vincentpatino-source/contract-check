@@ -625,7 +625,7 @@
     const col = gr ? gr.color : "#5d6870";
     const box = el("div", "health"); box.style.setProperty("--hc", col);
     const head = el("div", "health-head");
-    const title = el("h2"); title.append(document.createTextNode("Debt Health Report"));
+    const title = el("h2"); title.append(document.createTextNode("Financial Health Report"));
     const merchant = (done.find((c) => c.result.parties && c.result.parties.merchant) || { result: { parties: {} } }).result.parties.merchant;
     head.append(title, el("span", "chart-meta", (merchant ? merchant + " · " : "") + done.length + " agreement" + (done.length > 1 ? "s" : "") + " · " + fmtShort(asOf)));
     box.append(head);
