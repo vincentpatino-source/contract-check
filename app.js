@@ -56,9 +56,10 @@
   if (SETTINGS.phone) document.querySelectorAll("[data-phone]").forEach((n) => {
     const m = SETTINGS.phone.match(/^(.*?)\s*\((.*)\)\s*$/);
     if (m) {
-      const tel = el("a", "phone-link"); tel.href = "tel:" + m[2].replace(/[^0-9]/g, "");
-      tel.append(document.createTextNode(m[1]), el("br"), el("span", "phone-digits", m[2]));
-      n.textContent = ""; n.append(tel);
+      const href = "tel:" + m[2].replace(/[^0-9]/g, "");
+      const a1 = el("a", "phone-link", m[1]); a1.href = href;
+      const a2 = el("a", "phone-link phone-digits", m[2]); a2.href = href;
+      n.textContent = ""; n.append(a1, el("br"), a2);
     } else n.textContent = SETTINGS.phone;
     n.closest("[data-phone-wrap]")?.classList.remove("hidden");
   });
