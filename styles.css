@@ -256,73 +256,73 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
   .site-foot { padding-top: 32px; padding-bottom: 40px; }
 }
 
-/* Text 25% bigger on desktop */
+/* Text ~12% bigger on desktop */
 @media (min-width: 900px) {
-  body { font-size: 18.75px; }
-  h1 { font-size: 37.5px; }
-  h2 { font-size: 23.75px; }
-  h3 { font-size: 15px; }
-  .drop strong { font-size: 18.75px; }
-  .drop span { font-size: 16.25px; }
-  .files li { font-size: 16.25px; }
-  .files button { font-size: 16.25px; }
-  details summary { font-size: 17.5px; }
-  textarea { font-size: 15.62px; }
-  button.primary { font-size: 18.75px; }
-  button.secondary { font-size: 16.25px; }
-  .status { font-size: 16.25px; }
-  .privacy { font-size: 15.62px; }
-  .banner { font-size: 17.5px; }
-  .parties { font-size: 17.5px; }
-  .pill { font-size: 15px; }
-  .tile .label { font-size: 15px; }
-  .tile .value { font-size: 21.25px; }
-  .tile .note { font-size: 14.38px; }
-  .summary-text { font-size: 20px; }
-  .clause .desc { font-size: 17.5px; }
-  .clause blockquote { font-size: 16.25px; }
-  .disclaimer { font-size: 15.62px; }
-  .field label { font-size: 15px; }
-  .field input, .field select, .asof input { font-size: 17.5px; }
-  .inputs-note { font-size: 15.62px; }
-  .asof label { font-size: 16.25px; }
-  .asof small { font-size: 15px; }
-  .file-tag { font-size: 15px; }
-  table.sched, table.stack { font-size: 17.5px; }
-  table.sched th, table.stack th { font-size: 15px; }
-  .tag-double { font-size: 14.38px; }
-  .tag-moved { font-size: 15px; }
-  .placeholder { font-size: 17.5px; }
-  .err { font-size: 17.5px; }
-  .sub { font-size: 16.25px; }
-  .hint { font-size: 15.62px; }
-  .brand { font-size: 25px; }
-  .site-head nav a { font-size: 17.5px; }
-  .hero h1 { font-size: clamp(37.5px, 5.5vw, 57.5px); }
-  .lede { font-size: 22.5px; }
-  .agree { font-size: 16.25px; }
-  .quiet-links { font-size: 16.25px; }
-  .link-btn { font-size: 16.25px; }
-  .band h2 { font-size: 30px; }
-  .steps span, .term-grid span { font-size: 17.5px; }
-  .site-foot { font-size: 16.25px; }
-  .legal h1 { font-size: 42.5px; }
-  .legal h2 { font-size: 23.75px; }
-  .lead-fields input { font-size: 18.75px; }
-  .fine { font-size: 15px; }
-  .locked { font-size: 17.5px; }
-  .health-head .chart-meta { font-size: 15px; }
-  .grade .letter { font-size: 90px; }
-  .grade .gl { font-size: 13.75px; }
-  .diag .dx { font-size: 27.5px; }
-  .rev-row { font-size: 16.25px; }
-  .rev-row input { font-size: 17.5px; }
-  .vital .vt { font-size: 13.75px; }
-  .vital .vv { font-size: 35px; }
-  .vital .vv small { font-size: 16.25px; }
-  .vital .vn { font-size: 15.62px; }
-  .health-note { font-size: 15px; }
-  .vital .lvl { font-size: 13.12px; }
+  body { font-size: 16.88px; }
+  h1 { font-size: 33.75px; }
+  h2 { font-size: 21.38px; }
+  h3 { font-size: 13.5px; }
+  .drop strong { font-size: 16.88px; }
+  .drop span { font-size: 14.62px; }
+  .files li { font-size: 14.62px; }
+  .files button { font-size: 14.62px; }
+  details summary { font-size: 15.75px; }
+  textarea { font-size: 14.06px; }
+  button.primary { font-size: 16.88px; }
+  button.secondary { font-size: 14.62px; }
+  .status { font-size: 14.62px; }
+  .privacy { font-size: 14.06px; }
+  .banner { font-size: 15.75px; }
+  .parties { font-size: 15.75px; }
+  .pill { font-size: 13.5px; }
+  .tile .label { font-size: 13.5px; }
+  .tile .value { font-size: 19.12px; }
+  .tile .note { font-size: 12.94px; }
+  .summary-text { font-size: 18px; }
+  .clause .desc { font-size: 15.75px; }
+  .clause blockquote { font-size: 14.62px; }
+  .disclaimer { font-size: 14.06px; }
+  .field label { font-size: 13.5px; }
+  .field input, .field select, .asof input { font-size: 15.75px; }
+  .inputs-note { font-size: 14.06px; }
+  .asof label { font-size: 14.62px; }
+  .asof small { font-size: 13.5px; }
+  .file-tag { font-size: 13.5px; }
+  table.sched, table.stack { font-size: 15.75px; }
+  table.sched th, table.stack th { font-size: 13.5px; }
+  .tag-double { font-size: 12.94px; }
+  .tag-moved { font-size: 13.5px; }
+  .placeholder { font-size: 15.75px; }
+  .err { font-size: 15.75px; }
+  .sub { font-size: 14.62px; }
+  .hint { font-size: 14.06px; }
+  .brand { font-size: 22.5px; }
+  .site-head nav a { font-size: 15.75px; }
+  .hero h1 { font-size: clamp(33.75px, 4.95vw, 51.75px); }
+  .lede { font-size: 20.25px; }
+  .agree { font-size: 14.62px; }
+  .quiet-links { font-size: 14.62px; }
+  .link-btn { font-size: 14.62px; }
+  .band h2 { font-size: 27px; }
+  .steps span, .term-grid span { font-size: 15.75px; }
+  .site-foot { font-size: 14.62px; }
+  .legal h1 { font-size: 38.25px; }
+  .legal h2 { font-size: 21.38px; }
+  .lead-fields input { font-size: 16.88px; }
+  .fine { font-size: 13.5px; }
+  .locked { font-size: 15.75px; }
+  .health-head .chart-meta { font-size: 13.5px; }
+  .grade .letter { font-size: 81px; }
+  .grade .gl { font-size: 12.38px; }
+  .diag .dx { font-size: 24.75px; }
+  .rev-row { font-size: 14.62px; }
+  .rev-row input { font-size: 15.75px; }
+  .vital .vt { font-size: 12.38px; }
+  .vital .vv { font-size: 31.5px; }
+  .vital .vv small { font-size: 14.62px; }
+  .vital .vn { font-size: 14.06px; }
+  .health-note { font-size: 13.5px; }
+  .vital .lvl { font-size: 11.81px; }
 }
 
 /* How it works: number and heading on one line */
@@ -330,7 +330,7 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
 .steps li::before { grid-column: 1; grid-row: 1; }
 .steps li strong { grid-column: 2; grid-row: 1; }
 .steps li span { grid-column: 1 / -1; }
-@media (min-width: 900px) { .steps li { padding: 18px 22px; } .band h2 { font-size: 35px; } }
+@media (min-width: 900px) { .steps li { padding: 18px 22px; } .band h2 { font-size: 31.5px; } }
 
 /* Talk to someone: centered */
 .contact { text-align: center; }
