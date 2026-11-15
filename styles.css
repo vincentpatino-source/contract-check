@@ -342,3 +342,16 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
   .term-grid { grid-template-columns: repeat(3, 1fr); }
   .site-foot .disclaimer { max-width: none; }
 }
+
+/* Clean-up pass */
+.status:empty { display: none; }
+.hero h1 { max-width: 20ch; }
+@media (max-width: 640px) {
+  .site-head { flex-wrap: nowrap; }
+  .site-head .nav-extra { display: none; }
+  .site-head nav { order: 2; flex-basis: auto; margin-left: auto; }
+  .site-head .head-logo { order: 3; }
+  .hero h1 { font-size: 32px; }
+  .quiet-links { display: flex; flex-direction: column; gap: 8px; }
+  .quiet-links .dot { display: none; }
+}
