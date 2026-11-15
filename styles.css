@@ -360,3 +360,5 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
 .phone-line .phone-digits { font-weight: 500; color: var(--muted); }
 .contact p { text-wrap: balance; }
 .phone-line a.phone-digits { color: var(--muted); font-weight: 500; }
+.cta-row .reach-out { max-width: none; }
+.cta-row .reach-out strong { color: var(--good); }

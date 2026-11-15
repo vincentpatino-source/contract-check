@@ -94,7 +94,7 @@
   }
   unlockBtn.addEventListener("click", () => {
     if (!leadReady()) return;
-    unlocked = true; unlockedLead = lead();
+    unlocked = true; unlockedLead = Object.assign(lead(), { consultation_requested: true });
     unlockEl.classList.add("hidden");
     contracts.forEach((c) => { c.lead = unlockedLead; renderCard(c); if (c.status === "done") shareReport(c); });
     renderStack();
@@ -688,6 +688,14 @@
     tiles.append(tile("Paying each week", usd(weekly), "daily payments counted as 5 days"), tile("Still owed today", usd(owed), null, owed > 0), tile("Last one paid off", latest ? fmtShort(latest) : "—"));
     stackEl.append(tiles);
     const cta = el("div", "cta-row");
+    if (unlocked && !isSampleOnly) {
+      // Unlocking already sent their info and reports; no second click needed.
+      const first = ((unlockedLead && unlockedLead.name) || "").split(/\s+/)[0];
+      const msg = el("p", "reach-out");
+      msg.append(el("strong", null, (first ? "Thanks, " + first + ". " : "Thanks. ") + "Someone will reach out to you soon."));
+      msg.append(document.createTextNode(" We'll go over your report and options for lowering these payments, free and with no obligation."));
+      cta.append(msg); stackEl.append(cta); return;
+    }
     cta.append(el("p", null, "Want someone to look at options for lowering these payments? It's free and there's no obligation."));
     const btn = el("button", "primary inline", "Request my free consultation");
     btn.type = "button";
