@@ -228,3 +228,12 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
 .stack.health-wrap { border-top: 1px solid var(--rule); }
 .vital .vt { align-items: center; }
 .vital .lvl { color: var(--vc); border: 1px solid var(--vc); border-radius: 999px; padding: 2px 9px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; }
+
+.site-head .head-logo { display: inline-flex; order: 3; }
+.site-head nav { order: 2; margin-left: auto; }
+.site-head .head-logo img { width: 34px; height: 34px; display: block; }
+@media (max-width: 640px) {
+  .site-head .head-logo { order: 1; }
+  .site-head nav { order: 4; flex-basis: 100%; margin-left: 0; }
+  .site-head .head-logo img { width: 30px; height: 30px; }
+}
