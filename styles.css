@@ -362,3 +362,23 @@ dialog::backdrop { background: rgba(10, 20, 24, 0.45); }
 .phone-line a.phone-digits { color: var(--muted); font-weight: 500; }
 .cta-row .reach-out { max-width: none; }
 .cta-row .reach-out strong { color: var(--good); }
+
+/* State pages */
+a.btn-link { display: inline-block; background: var(--accent); color: var(--sheet); border-radius: 8px; padding: 12px 22px; font: 600 15px var(--body); text-decoration: none; }
+a.btn-link:hover { filter: brightness(1.08); }
+.state-page .state-hero { padding-top: 8px; }
+.state-page .state-hero h1 { max-width: 26ch; margin: 12px 0 16px; text-wrap: balance; }
+.crumbs { font-size: 13px; color: var(--muted); }
+.crumbs a { color: var(--muted); }
+.state-sum { max-width: 70ch; }
+.state-rules { padding-left: 20px; max-width: 75ch; display: grid; gap: 12px; margin: 16px 0; }
+.state-rules li { line-height: 1.55; }
+.updated { font-size: 13px; color: var(--muted); }
+.state-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.state-link { display: block; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 8px; text-decoration: none; color: var(--ink); }
+.state-link:hover { border-color: var(--accent); }
+.state-link strong { display: block; }
+.state-link span { font-size: 13px; color: var(--muted); }
+.state-page .contact .phone-line a { color: var(--ink); text-decoration: none; }
+.state-page .contact .phone-line a.phone-digits { color: var(--muted); }
+@media (min-width: 900px) { a.btn-link { font-size: 16.88px; } }
