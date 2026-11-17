@@ -563,8 +563,8 @@
     { max: 0.075, g: "A", color: "#2f9a5a", dx: "Healthy", text: "Your payments take a small share of your revenue. Your business has room to breathe." },
     { max: 0.15, g: "B", color: "#5c9a2f", dx: "Stable", text: "Payments are manageable, but keep an eye on adding more financing." },
     { max: 0.25, g: "C", color: "#c58a0a", dx: "Strained", text: "About a fifth of your revenue goes to payments. One slow month can make this tight." },
-    { max: 0.40, g: "D", color: "#d9661f", dx: "Serious", text: "Payments are taking a large bite out of your revenue. This is where businesses start falling behind." },
-    { max: Infinity, g: "F", color: "#c62828", dx: "Critical", text: "Payments are eating a dangerous share of your revenue. Many businesses at this level are at risk of default." }
+    { max: 0.40, g: "D", color: "#d9661f", dx: "Serious", text: "Payments are taking a large bite out of your revenue. There is little room left for other expenses." },
+    { max: Infinity, g: "F", color: "#c62828", dx: "Critical", text: "Payments are eating a dangerous share of your revenue. Most of your sales are going to these payments." }
   ];
   function healthData(done) {
     let monthly = 0, owed = 0, aprW = 0, aprBase = 0, highs = 0, revenue = null, revSrc = "", revDate = "";
@@ -728,10 +728,10 @@
       clauses: [
         { key: "reconciliation", found: true, summary: "You can ask every month for your payment to be adjusted to 12% of your actual sales.", quote: "", page: 3, risk: "low" },
         { key: "personal_guarantee", found: true, summary: "You personally guarantee the agreement.", quote: "", page: 7, risk: "high" },
-        { key: "processor_or_account_change_default", found: true, summary: "Switching your bank or card processor without consent counts as a default.", quote: "", page: 4, risk: "high" },
-        { key: "default_fees_and_penalties", found: true, summary: "A default makes the whole balance due plus a 25% fee.", quote: "", page: 6, risk: "high" }
+        { key: "stacking_prohibition", found: true, summary: "You can't take another advance without the funder's written consent.", quote: "", page: 4, risk: "high" },
+        { key: "prepayment_or_early_payoff", found: true, summary: "Paying early does not reduce the $74,500 you owe.", quote: "", page: 5, risk: "high" }
       ],
-      red_flags: ["Switching your bank or processor could trigger a default.", "A 25% default fee is added to the remaining balance."],
+      red_flags: ["Paying early does not reduce what you owe.", "A $2,995 origination fee came out of your funding."],
       owner_next_steps: ["If your sales have dropped, your contract lets you request a reconciliation.", "Before taking another advance, add up all your daily payments against your daily deposits."],
       summary: "Sample report. You received about $47,000 and will pay back $74,500 at $745 every business day. Your contract lets you ask for payments based on your actual sales.",
       confidence_note: "This is a sample, not your contract."
