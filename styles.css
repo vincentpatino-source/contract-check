@@ -450,3 +450,4 @@ details.issue-col ul { padding: 12px 14px 4px; }
 @media (max-width: 560px) { .compare { grid-template-columns: 1fr; } }
 .sources ul { padding-left: 20px; } .sources li { margin: 6px 0; font-size: 14px; }
 .illus-narrow { max-width: 460px; }
+.glossary { display: grid; gap: 0; margin: 0; max-width: 820px; } .gterm { padding: 14px 0; border-bottom: 1px solid var(--rule); } .gterm dt { font-weight: 700; color: var(--ink); } .gterm dd { margin: 4px 0 0; color: var(--muted); } .gterm dd a { white-space: nowrap; }
