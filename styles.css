@@ -451,3 +451,8 @@ details.issue-col ul { padding: 12px 14px 4px; }
 .sources ul { padding-left: 20px; } .sources li { margin: 6px 0; font-size: 14px; }
 .illus-narrow { max-width: 460px; }
 .glossary { display: grid; gap: 0; margin: 0; max-width: 820px; } .gterm { padding: 14px 0; border-bottom: 1px solid var(--rule); } .gterm dt { font-weight: 700; color: var(--ink); } .gterm dd { margin: 4px 0 0; color: var(--muted); } .gterm dd a { white-space: nowrap; }
+.pro-callout { margin-top: 20px; max-width: 760px; background: var(--sheet); border: 1px solid var(--accent); border-radius: 12px; padding: 20px 22px; }
+.pro-callout h3 { margin: 0 0 8px; font-size: 20px; }
+.pro-callout p { margin: 0 0 10px; }
+.pro-callout ul { margin: 0 0 16px; padding-left: 20px; color: var(--muted); display: grid; gap: 6px; }
+.pro-callout h3 { text-transform: none; letter-spacing: 0; color: var(--ink); font-family: var(--display, inherit); }
