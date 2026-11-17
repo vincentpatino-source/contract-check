@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=25">
+<link rel="stylesheet" href="styles.css?v=26">
 <!-- Google tag: paste your Google Ads / Analytics tag here -->
 <!-- Meta Pixel (optional): paste here -->
 </head>
@@ -22,8 +22,14 @@
 <header class="site-head">
   <a class="brand" href="#top" data-brand>DebtMedx</a>
   <nav>
-    <a href="#how" class="nav-extra">How it works</a>
-    <a href="#faq" class="nav-extra">FAQ</a>
+    <details class="nav-menu">
+      <summary>Guides</summary>
+      <div class="nav-drop">
+        <a href="/mca/"><strong>By state</strong><span>Rules and help in all 50 states</span></a>
+        <a href="/topics/"><strong>By topic</strong><span>Lawsuits, frozen accounts, usury and more</span></a>
+        <a href="/topics/#funders"><strong>By funder</strong><span>Coming soon</span></a>
+      </div>
+    </details>
     <a href="#" class="nav-cta" data-lead="header">Free review</a>
   </nav>
   <a href="#top" class="head-logo" aria-label="DebtMedx home"><img src="favicon.svg" alt="" width="34" height="34"></a>
@@ -90,6 +96,7 @@
       <div><strong>Upfront fees</strong><span>What was taken out before the money reached you.</span></div>
       <div><strong>Hidden fees</strong><span>Broker fees and ongoing charges built into your cost.</span></div>
       <div><strong>What it's secured by</strong><span>What backs your advance, and why it isn't a loan.</span></div>
+      <div><strong>Reconciliation</strong><span>Whether asking for lower payments could be used to add default fees.</span></div>
       <div><strong>Early payoff</strong><span>Whether paying early saves you money.</span></div>
       <div><strong>Stacking</strong><span>Whether you can take other advances, and whether your funders followed their own rule.</span></div>
     </div>
@@ -100,7 +107,10 @@
     <details><summary>Is this really free?</summary><p>Yes. Checking your contracts costs nothing. If you'd like help exploring options afterward, you can ask for a free review.</p></details>
     <details><summary>Who sees my contracts?</summary><p>Your contract is read by our AI to build your report. DebtMedx only receives your report and documents if you choose to unlock your full report and share your information. We keep them confidential and never sell your information. See our <a href="privacy.html">privacy policy</a>.</p></details>
     <details><summary>How accurate is the APR?</summary><p>It's an estimate based on the dates and amounts in your contract, assuming payments continue as scheduled. Merchant cash advances often have no fixed term, so treat it as a guide.</p></details>
-    <details><summary>What's a reverse consolidation?</summary><p>An advance where the funder pays you in weekly installments, often to cover other advances, while you make payments back. We show both sides of the schedule.</p></details>
+    <details><summary>What's a reverse consolidation?</summary><p>An advance where the funder pays you in weekly installments, often to cover other advances, while you make payments back. We show both sides of the schedule. <a href="/topics/reverse-consolidation/">Read: Reverse consolidations explained →</a></p></details>
+    <details><summary>Can an MCA be illegal?</summary><p>Sometimes. If a court finds an MCA is really a loan in disguise, and its rate is above the legal limit, it may not be enforceable. <a href="/topics/loan-or-sale/">Read: Is an MCA a loan or a sale? →</a></p></details>
+    <details><summary>Should I ask my funder for reconciliation?</summary><p>Not before you read the fine print. Some contracts treat a lower payment or a missed step during reconciliation as a default that adds fees. <a href="/topics/reconciliation/">Read: The catch behind lower payments →</a></p></details>
+    <details><summary>I've been sued or my account is frozen. What now?</summary><p>Move fast. Lawsuits come with short deadlines, and a frozen account can sometimes be challenged. <a href="/topics/mca-lawsuit/">Read: Served with an MCA lawsuit →</a> · <a href="/topics/frozen-bank-account/">Frozen bank accounts →</a></p></details>
     <details><summary>Is this legal advice?</summary><p>No. It's an educational review. For legal questions about your agreement, talk to a licensed attorney.</p></details>
   </section>
 
@@ -112,6 +122,10 @@
   </section>
 </main>
 
+<section class="issues-band" aria-label="Common MCA issues">
+  <h2>Common MCA issues</h2>
+  <div class="issue-cols"><details class="issue-col"><summary>Understanding your MCA</summary><ul><li><a href="/topics/loan-or-sale/">Is an MCA a loan or a sale?</a></li><li><a href="/topics/usury/">Usury and MCAs</a></li><li><a href="/topics/default-fees/">Default fees</a></li><li><a href="/topics/reconciliation/">Reconciliation</a></li><li><a href="/topics/reverse-consolidation/">Reverse consolidations</a></li><li><a href="/topics/brokers-isos/">Brokers (ISOs)</a></li></ul></details><details class="issue-col"><summary>If you're behind or sued</summary><ul><li><a href="/topics/mca-lawsuit/">Served with an MCA lawsuit</a></li><li><a href="/topics/where-you-can-be-sued/">Where you can be sued</a></li><li><a href="/topics/vacating-a-judgment/">Vacating a judgment</a></li><li><a href="/topics/frozen-bank-account/">Frozen bank accounts</a></li><li><a href="/topics/receiverships/">Receiverships</a></li></ul></details><details class="issue-col"><summary>Your rights and options</summary><ul><li><a href="/topics/predatory-terms/">Predatory and unfair terms</a></li><li><a href="/topics/government-actions/">Attorney general and FTC actions</a></li><li><a href="/topics/rico/">RICO claims against funders</a></li><li><a href="/topics/bankruptcy/">Bankruptcy and MCAs</a></li><li><a href="/topics/mca-attorney/">Do you need an MCA attorney?</a></li></ul></details><details class="issue-col"><summary>Find your state or funder</summary><ul><li><a href="/mca/">MCA rules in all 50 states</a></li><li><a href="/topics/#funders">Funders (coming soon)</a></li></ul></details></div>
+</section>
 <footer class="site-foot">
   <p><span data-brand>DebtMedx</span> · <a href="/mca/">MCA help by state</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>
   <p class="disclaimer">We are an educational referral service and do not provide legal, financial, or tax advice.</p>
@@ -135,7 +149,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
 <script async src="https://tally.so/widgets/embed.js"></script>
-<script src="schedule.js?v=25"></script>
-<script src="app.js?v=25"></script>
+<script src="schedule.js?v=26"></script>
+<script src="app.js?v=26"></script>
 </body>
 </html>
