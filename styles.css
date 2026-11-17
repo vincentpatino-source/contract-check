@@ -388,3 +388,7 @@ a.btn-link:hover { filter: brightness(1.08); }
 .problem strong { display: block; margin-bottom: 6px; }
 .problem p { margin: 0; color: var(--muted); }
 @media (min-width: 900px) { .state-page .steps { grid-template-columns: repeat(4, 1fr); } .problems { grid-template-columns: repeat(2, 1fr); } }
+.cta-group { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 8px; }
+.btn-secondary { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.cta-alt { margin-top: 10px; }
+@media (max-width: 640px) { .cta-group .btn-link { width: 100%; text-align: center; } }

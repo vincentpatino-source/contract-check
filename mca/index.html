@@ -16,14 +16,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=24">
+<link rel="stylesheet" href="/styles.css?v=25">
 </head>
 <body>
 <header class="site-head">
   <a class="brand" href="/">DebtMedx</a>
   <nav>
     <a href="/mca/" class="nav-extra">By state</a>
-    <a href="/" class="nav-cta">Free check</a>
+    <a href="#" class="nav-cta" data-lead="state_index_header">Free review</a>
   </nav>
   <a href="/" class="head-logo" aria-label="DebtMedx home"><img src="/favicon.svg" alt="" width="34" height="34"></a>
 </header>
@@ -32,7 +32,11 @@
   <section class="state-hero">
     <h1>Merchant cash advance rules by state</h1>
     <p class="lede">Some states make MCA funders show you the real cost before you sign. Others don't. Pick your state to see what applies to you.</p>
-    <a class="primary inline btn-link" href="/">Check my contract free</a>
+    <div class="cta-group">
+      <a class="primary inline btn-link" href="#" data-lead="state_index_hero">Speak with a restructuring expert</a>
+      <a class="btn-secondary" href="/">Check my contract free</a>
+      <a class="btn-secondary" href="/#estimate">Debt calculator</a>
+    </div>
   </section>
   <section class="band">
     <h2>Choose your state</h2>
@@ -73,7 +77,8 @@
   <section class="band contact" id="contact">
     <h2>Speak with an expert</h2>
     <p>Are you behind or juggling several advances?</p>
-    <a class="primary inline btn-link" href="/">Check my contract free</a>
+    <a class="primary inline btn-link" href="#" data-lead="state_index_contact">Speak with a restructuring expert</a>
+    <p class="cta-alt"><a href="/">Check my contract free</a> · <a href="/#estimate">Debt calculator</a></p>
     <p class="phone-line">Or call <strong><a class="phone-link" href="tel:18626224376">1-862-MCA-HERO</a><br><a class="phone-link phone-digits" href="tel:18626224376">1-862-622-4376</a></strong></p>
   </section>
 </main>
@@ -82,5 +87,7 @@
   <p>DebtMedx · <a href="/mca/">MCA help by state</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></p>
   <p class="disclaimer">We are an educational referral service and do not provide legal, financial, or tax advice. State rules summarized here are general information as of November 2026 and can change.</p>
 </footer>
+<script async src="https://tally.so/widgets/embed.js"></script>
+<script src="/state.js?v=25"></script>
 </body>
 </html>

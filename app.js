@@ -794,6 +794,7 @@
     return { rows: rows.length, weekly, owed, monthly, rev };
   }
   $("quickOpen").addEventListener("click", (e) => { e.preventDefault(); if (!qeRows.children.length) addQeRow(); calcQe(); qeDialog.showModal(); });
+  if (location.hash === "#estimate") { if (!qeRows.children.length) addQeRow(); calcQe(); try { qeDialog.showModal(); } catch (e) {} }
   $("qeAdd").addEventListener("click", () => { addQeRow(); });
   $("qeRevenue").addEventListener("input", calcQe);
   $("qeClose").addEventListener("click", () => qeDialog.close());
