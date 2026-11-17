@@ -456,3 +456,6 @@ details.issue-col ul { padding: 12px 14px 4px; }
 .pro-callout p { margin: 0 0 10px; }
 .pro-callout ul { margin: 0 0 16px; padding-left: 20px; color: var(--muted); display: grid; gap: 6px; }
 .pro-callout h3 { text-transform: none; letter-spacing: 0; color: var(--ink); font-family: var(--display, inherit); }
+.fsearch-label { display: block; font-weight: 600; margin-bottom: 6px; }
+.fsearch { width: 100%; max-width: 420px; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); font: inherit; margin-bottom: 16px; }
+.funder-link .tag { display: inline-block; margin-top: 6px; font-style: normal; font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 8px; }
