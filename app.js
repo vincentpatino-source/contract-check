@@ -13,15 +13,12 @@
   const CLAUSE_LABELS = {
     reconciliation: "Reconciliation (payment adjusts to your sales)",
     personal_guarantee: "Personal guarantee",
-    confession_of_judgment: "Confession of judgment",
     security_interest_ucc: "Security interest / UCC lien",
-    processor_or_account_change_default: "Default for changing processor or bank",
+    processor_or_account_change: "Changing your processor or bank",
+    processor_or_account_change_default: "Changing your processor or bank",
     stacking_prohibition: "Ban on other advances (stacking)",
-    events_of_default: "Events of default",
-    default_fees_and_penalties: "Default fees and penalties",
     prepayment_or_early_payoff: "Early payoff discount",
     arbitration_venue_jury_waiver: "Venue, arbitration, jury waiver",
-    cross_default: "Cross-default with other agreements",
     true_sale_language: "\"Not a loan\" language"
   };
   const RISK_ORDER = { high: 0, medium: 1, low: 2 };
@@ -273,12 +270,17 @@
     return postReview(JSON.stringify({ text: text.slice(0, 180000), images }), { "content-type": "application/json" });
   }
 
+  // Only show the contract terms we cover (no default-related terms).
+  function cleanResult(r) {
+    if (r && Array.isArray(r.clauses)) r.clauses = r.clauses.filter((x) => x && CLAUSE_LABELS[x.key]);
+    return r;
+  }
   // Quietly retry hiccups (up to 4 tries) so the owner never has to.
   const RETRY_WAITS = [2000, 5000, 10000];
   async function runOne(c) {
     c.status = "running"; c.error = ""; c.tries = 0; renderCard(c);
     for (let attempt = 0; attempt <= RETRY_WAITS.length; attempt++) {
-      try { c.result = await analyzeJob(c.job); c.inp = inpFromResult(c.result); c.status = "done"; c.error = ""; break; }
+      try { c.result = cleanResult(await analyzeJob(c.job)); c.inp = inpFromResult(c.result); c.status = "done"; c.error = ""; break; }
       catch (err) {
         c.status = "error"; c.error = (err && err.message) || "We couldn't finish reading this contract.";
         if (!(err && err.retryable) || attempt === RETRY_WAITS.length) break;
