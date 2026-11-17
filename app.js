@@ -91,6 +91,7 @@
   unlockBtn.addEventListener("click", () => {
     if (!leadReady()) return;
     unlocked = true; unlockedLead = Object.assign(lead(), { consultation_requested: true });
+    if (window.dmxTrack) window.dmxTrack("generate_lead", { method: "report_unlock" });
     unlockEl.classList.add("hidden");
     contracts.forEach((c) => { c.lead = unlockedLead; renderCard(c); if (c.status === "done") shareReport(c); });
     renderStack();
@@ -316,6 +317,7 @@
     $("sampleNote").classList.add("hidden");
     resultsWrap.classList.remove("hidden");
     const batch = batchJobs.map((j) => {
+      if (window.dmxTrack) window.dmxTrack("contract_upload");
       const c = { id: Math.random().toString(36).slice(2), name: j.name, status: "pending", job: j, lead: unlockedLead, node: el("article", "panel contract contract-card") };
       cardsEl.appendChild(c.node); renderCard(c); contracts.push(c); return c;
     });
