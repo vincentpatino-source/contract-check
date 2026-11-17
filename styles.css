@@ -382,3 +382,4 @@ a.btn-link:hover { filter: brightness(1.08); }
 .state-page .contact .phone-line a { color: var(--ink); text-decoration: none; }
 .state-page .contact .phone-line a.phone-digits { color: var(--muted); }
 @media (min-width: 900px) { a.btn-link { font-size: 16.88px; } }
+.stack-note { color: var(--warn, #e0a83a); }

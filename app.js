@@ -286,7 +286,9 @@
       }
     }
     if (c.status === "error") c.error = c.error.replace(/\s*Please (re)?try( again)?[^.]*\.?/gi, "").trim();
-    renderCard(c); renderStack();
+    renderCard(c);
+    if (c.status === "done") contracts.forEach((x) => { if (x !== c && x.status === "done" && x.id !== "sample") renderCard(x); });
+    renderStack();
     if (c.status === "done" && unlocked) shareReport(c);
   }
   function retryContract(c) {
@@ -437,6 +439,10 @@
       const body = el("div");
       body.append(el("div", "name", CLAUSE_LABELS[cl.key] || cl.key));
       if (cl.summary) body.append(el("p", "desc", cl.summary));
+      if (cl.key === "stacking_prohibition") {
+        const n = contracts.filter((x) => x.status === "done" && x.id !== "sample").length;
+        if (n >= 2) body.append(el("p", "desc stack-note", "You have " + n + " advances or loans here. Funders often fund businesses that already have other advances, even when their own contracts ban stacking. It's worth asking whether each funder followed its own rule when it funded you."));
+      }
       if (cl.quote) body.append(el("blockquote", null, "“" + cl.quote + "”" + (cl.page ? "  · p. " + cl.page : "")));
       const riskLabel = { high: "High risk", medium: "Watch", low: "Low risk" }[cl.risk] || "Unrated";
       const pill = el("span", "pill " + (cl.found ? (cl.risk || "absent") : "absent"), cl.found ? riskLabel : "Not found");
