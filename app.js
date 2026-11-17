@@ -11,14 +11,9 @@
   // ====================================================
 
   const CLAUSE_LABELS = {
-    reconciliation: "Reconciliation (payment adjusts to your sales)",
-    personal_guarantee: "Personal guarantee",
     security_interest_ucc: "Security interest / UCC lien",
-    processor_or_account_change: "Changing your processor or bank",
-    processor_or_account_change_default: "Changing your processor or bank",
     stacking_prohibition: "Ban on other advances (stacking)",
     prepayment_or_early_payoff: "Early payoff discount",
-    arbitration_venue_jury_waiver: "Venue, arbitration, jury waiver",
     true_sale_language: "\"Not a loan\" language"
   };
   const RISK_ORDER = { high: 0, medium: 1, low: 2 };
@@ -728,14 +723,13 @@
       stated_monthly_revenue: 90000,
       money: { purchase_price: 50000, purchased_amount: 74500, factor_rate: 1.49, upfront_fees: [{ name: "Origination", amount: 2995 }], net_funded: 47005, payment_amount: 745, payment_frequency: "daily" },
       clauses: [
-        { key: "reconciliation", found: true, summary: "You can ask every month for your payment to be adjusted to 12% of your actual sales.", quote: "", page: 3, risk: "low" },
-        { key: "personal_guarantee", found: true, summary: "You personally guarantee the agreement.", quote: "", page: 7, risk: "high" },
+        { key: "security_interest_ucc", found: true, summary: "The funder files a UCC lien on your business receivables.", quote: "", page: 3, risk: "medium" },
         { key: "stacking_prohibition", found: true, summary: "You can't take another advance without the funder's written consent.", quote: "", page: 4, risk: "high" },
         { key: "prepayment_or_early_payoff", found: true, summary: "Paying early does not reduce the $74,500 you owe.", quote: "", page: 5, risk: "high" }
       ],
       red_flags: ["Paying early does not reduce what you owe.", "A $2,995 origination fee came out of your funding."],
-      owner_next_steps: ["If your sales have dropped, your contract lets you request a reconciliation.", "Before taking another advance, add up all your daily payments against your daily deposits."],
-      summary: "Sample report. You received about $47,000 and will pay back $74,500 at $745 every business day. Your contract lets you ask for payments based on your actual sales.",
+      owner_next_steps: ["Compare the $74,500 you pay back with the $47,005 you actually received.", "Before taking another advance, add up all your daily payments against your daily deposits."],
+      summary: "Sample report. You received about $47,000 and will pay back $74,500 at $745 every business day.",
       confidence_note: "This is a sample, not your contract."
     };
     contracts = []; cardsEl.innerHTML = ""; unlockEl.classList.add("hidden");

@@ -8,9 +8,7 @@ const MAX_IMAGES = 15;
 const MAX_IMAGE_B64 = 2500000;
 
 const CLAUSE_KEYS = [
-  "reconciliation", "personal_guarantee", "security_interest_ucc",
-  "processor_or_account_change", "stacking_prohibition",
-  "prepayment_or_early_payoff", "arbitration_venue_jury_waiver", "true_sale_language"
+  "security_interest_ucc", "stacking_prohibition", "prepayment_or_early_payoff", "true_sale_language"
 ];
 
 // Best-effort limiter per warm instance. Also set a monthly spend limit in the Anthropic Console.
@@ -54,15 +52,15 @@ function buildPrompt(hasImages, contractText, isPdf) {
     "- funding_structure: \"reverse_consolidation\" when the funder pays the merchant in installments instead of one lump sum. Then fill disbursement.schedule with EVERY disbursement listed in the contract's disbursement schedule (usually a table near the end), in order, with its exact amount and its date if given. Amounts usually decrease over time. Fees are already reflected in the total paid to the merchant, so never subtract fees from a disbursement yourself.",
     "- Include exactly one clauses entry for each key: " + CLAUSE_KEYS.join(", ") + ". Absent clause: found=false, quote=\"\", short explanation in summary.",
     "- quote: at most 30 words copied verbatim, or \"\". Never invent text.",
-    "- risk is risk to the business owner. An existing reconciliation right is low risk; a missing one is high risk.",
+    "- risk is risk to the business owner.",
     "- Money values are plain dollar numbers. specified_percentage is a percent (12 means 12%). net_funded = purchase price minus fees withheld, if stated or computable. Use null when not stated; never guess.",
     "- red_flags: up to 5, most serious first, one plain sentence each.",
-    "- Never mention default, events of default, default fees or penalties, cross-default, acceleration, confession of judgment, collections, lawsuits, judgments, liens being enforced, or any other consequence of missing or stopping payments, anywhere in the output (summary, clause summaries, quotes, red_flags, owner_next_steps, confidence_note). Describe each term only as what the contract requires, allows or costs. For processor_or_account_change, say only whether the owner may switch banks or card processors and what consent is needed.",
-    "- owner_next_steps: 3-4 short, general, educational options written to the owner (for example, how reconciliation works if their contract has it, or questions to ask before signing another advance). Never promise outcomes, never advise stopping or skipping payments, never call anything illegal, never give legal advice.",
+    "- Never mention default, events of default, default fees or penalties, cross-default, acceleration, confession of judgment, collections, lawsuits, judgments, liens being enforced, or any other consequence of missing or stopping payments, anywhere in the output (summary, clause summaries, quotes, red_flags, owner_next_steps, confidence_note). Describe each term only as what the contract requires, allows or costs. Also never mention reconciliation, personal guarantees or guarantors, arbitration, venue, jury waivers, or rules about changing banks or card processors.",
+    "- owner_next_steps: 3-4 short, general, educational options written to the owner (for example, questions to ask before signing another advance, or how to compare total payback against what they received). Never promise outcomes, never advise stopping or skipping payments, never call anything illegal, never give legal advice.",
     "- summary: 3-5 short plain-English sentences written to the owner. confidence_note: one sentence on unreadable parts or uncertain figures.",
     "- stated_monthly_revenue: the business's monthly revenue, sales, deposits or receivables as stated anywhere in the agreement, application or underwriting pages (e.g. 'average monthly revenue', 'monthly gross sales', 'average monthly deposits'). If only an annual figure is given, divide it by 12. null if no figure is stated. revenue_quote: up to 20 words copied verbatim where you found it, or \"\".",
     "- Term loans, lines of credit and other business financing are fully supported: never treat them as an error. Map their terms onto the same fields: purchase_price = loan amount or amount financed, purchased_amount = total of all scheduled payments (total repayment), upfront_fees = origination and other fees, payment_amount and payment_frequency = the scheduled loan payment. stated_apr = the APR printed in the agreement or disclosure, if any, else null. contract_type = \"loan\" for loans and credit lines.",
-    "- For loans, reconciliation and true-sale language usually don't apply: set found=false, risk=\"low\", and say \"Not applicable to loans\" in summary. Still check personal guarantees, security interests, prepayment terms and fees.",
+    "- For loans, true-sale language usually doesn't apply: set found=false, risk=\"low\", and say \"Not applicable to loans\" in summary. Still check security interests, prepayment terms and fees.",
     "- is_mca_contract = true only for merchant cash advances and reverse consolidations. If the document is not a financing agreement at all, set agreement_type=\"not_financing\" and explain in summary.",
     "",
     isPdf ? "The contract is attached as a PDF document." : contractText ? "CONTRACT TEXT:\n" + contractText : "The contract pages are attached as images, in order."
