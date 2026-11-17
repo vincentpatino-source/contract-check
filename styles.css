@@ -383,3 +383,8 @@ a.btn-link:hover { filter: brightness(1.08); }
 .state-page .contact .phone-line a.phone-digits { color: var(--muted); }
 @media (min-width: 900px) { a.btn-link { font-size: 16.88px; } }
 .stack-note { color: var(--warn, #e0a83a); }
+.problems { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.problem { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; }
+.problem strong { display: block; margin-bottom: 6px; }
+.problem p { margin: 0; color: var(--muted); }
+@media (min-width: 900px) { .state-page .steps { grid-template-columns: repeat(4, 1fr); } .problems { grid-template-columns: repeat(2, 1fr); } }
