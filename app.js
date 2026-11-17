@@ -17,6 +17,7 @@
     secured_by: "What it's secured by",
     prepayment_or_early_payoff: "Early payoff discount",
     reconciliation: "Reconciliation",
+    bankruptcy_prohibition: "Bankruptcy restrictions",
     stacking_prohibition: "Ban on other advances (stacking)"
   };
   const RISK_ORDER = { high: 0, medium: 1, low: 2 };
@@ -737,6 +738,7 @@
         { key: "hidden_fees", found: true, summary: "A $49 monthly administrative fee is charged for the life of the advance.", quote: "", page: 5, risk: "medium" },
         { key: "secured_by", found: true, summary: "This is written as a purchase of your future sales from the day you signed, not a loan. Because it isn't a loan, it generally isn't subject to the interest-rate limits on loans, which is how the cost runs this high even though the contract never calls it interest. The funder's security is your future receivables.", quote: "", page: 2, risk: "medium" },
         { key: "reconciliation", found: true, summary: "You can ask for payments based on your actual sales, but any payment below $745 during the review counts as a breach and adds a default fee.", quote: "", page: 3, risk: "high" },
+        { key: "bankruptcy_prohibition", found: true, summary: "You agree not to file bankruptcy, and filing is treated as a breach that makes the full balance due. Courts generally treat advance promises not to file bankruptcy as unenforceable.", quote: "", page: 5, risk: "high" },
         { key: "stacking_prohibition", found: true, summary: "You can't take another advance without the funder's written consent.", quote: "", page: 4, risk: "high" },
         { key: "prepayment_or_early_payoff", found: true, summary: "Paying early does not reduce the $74,500 you owe.", quote: "", page: 5, risk: "high" }
       ],
