@@ -11,10 +11,12 @@
   // ====================================================
 
   const CLAUSE_LABELS = {
-    security_interest_ucc: "Security interest / UCC lien",
-    stacking_prohibition: "Ban on other advances (stacking)",
+    total_payback: "Total payback",
+    upfront_fees: "Upfront fees",
+    hidden_fees: "Hidden fees",
+    secured_by: "What it's secured by",
     prepayment_or_early_payoff: "Early payoff discount",
-    true_sale_language: "\"Not a loan\" language"
+    stacking_prohibition: "Ban on other advances (stacking)"
   };
   const RISK_ORDER = { high: 0, medium: 1, low: 2 };
   const FREQS = ["daily", "weekly", "biweekly", "monthly"];
@@ -723,7 +725,10 @@
       stated_monthly_revenue: 90000,
       money: { purchase_price: 50000, purchased_amount: 74500, factor_rate: 1.49, upfront_fees: [{ name: "Origination", amount: 2995 }], net_funded: 47005, payment_amount: 745, payment_frequency: "daily" },
       clauses: [
-        { key: "security_interest_ucc", found: true, summary: "The funder files a UCC lien on your business receivables.", quote: "", page: 3, risk: "medium" },
+        { key: "total_payback", found: true, summary: "You pay back $74,500 for the $47,005 you actually received, $27,495 more than you got.", quote: "", page: 1, risk: "high" },
+        { key: "upfront_fees", found: true, summary: "A $2,995 origination fee was taken out before the money reached you.", quote: "", page: 1, risk: "medium" },
+        { key: "hidden_fees", found: true, summary: "A $49 monthly administrative fee is charged for the life of the advance.", quote: "", page: 5, risk: "medium" },
+        { key: "secured_by", found: true, summary: "This is written as a purchase of your future sales from the day you signed, not a loan. Because it isn't a loan, it generally isn't subject to the interest-rate limits on loans, which is how the cost runs this high even though the contract never calls it interest. The funder's security is your future receivables.", quote: "", page: 2, risk: "medium" },
         { key: "stacking_prohibition", found: true, summary: "You can't take another advance without the funder's written consent.", quote: "", page: 4, risk: "high" },
         { key: "prepayment_or_early_payoff", found: true, summary: "Paying early does not reduce the $74,500 you owe.", quote: "", page: 5, risk: "high" }
       ],

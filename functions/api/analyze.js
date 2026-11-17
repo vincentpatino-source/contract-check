@@ -8,7 +8,7 @@ const MAX_IMAGES = 15;
 const MAX_IMAGE_B64 = 2500000;
 
 const CLAUSE_KEYS = [
-  "security_interest_ucc", "stacking_prohibition", "prepayment_or_early_payoff", "true_sale_language"
+  "total_payback", "upfront_fees", "hidden_fees", "secured_by", "prepayment_or_early_payoff", "stacking_prohibition"
 ];
 
 // Best-effort limiter per warm instance. Also set a monthly spend limit in the Anthropic Console.
@@ -60,7 +60,11 @@ function buildPrompt(hasImages, contractText, isPdf) {
     "- summary: 3-5 short plain-English sentences written to the owner. confidence_note: one sentence on unreadable parts or uncertain figures.",
     "- stated_monthly_revenue: the business's monthly revenue, sales, deposits or receivables as stated anywhere in the agreement, application or underwriting pages (e.g. 'average monthly revenue', 'monthly gross sales', 'average monthly deposits'). If only an annual figure is given, divide it by 12. null if no figure is stated. revenue_quote: up to 20 words copied verbatim where you found it, or \"\".",
     "- Term loans, lines of credit and other business financing are fully supported: never treat them as an error. Map their terms onto the same fields: purchase_price = loan amount or amount financed, purchased_amount = total of all scheduled payments (total repayment), upfront_fees = origination and other fees, payment_amount and payment_frequency = the scheduled loan payment. stated_apr = the APR printed in the agreement or disclosure, if any, else null. contract_type = \"loan\" for loans and credit lines.",
-    "- For loans, true-sale language usually doesn't apply: set found=false, risk=\"low\", and say \"Not applicable to loans\" in summary. Still check security interests, prepayment terms and fees.",
+    "- Clause guidance. Every clause entry must be accurate to this contract; never state anything the contract does not support.",
+    "  total_payback: found=true. Say what the owner pays back in total versus what they actually received (net of fees), and the difference in dollars. risk: low if total payback is under 1.25x the amount received, medium under 1.40x, else high.",
+    "  upfront_fees: every fee taken out before the money reached the owner (origination, underwriting, closing, due diligence, wire), with amounts and the total. found=false if none. risk: low under 3% of the funded amount, medium under 8%, else high.",
+    "  hidden_fees: costs that are easy to miss: broker or ISO commissions built into the cost, and ongoing charges during the term (monthly, administrative, servicing, ACH or bank transfer, renewal or refinance fees). Do not include fees that only apply after missed or returned payments. found=false if none are listed. risk: medium if any recurring charge or built-in broker fee, else low.",
+    "  secured_by: what the agreement says backs the funding. For merchant cash advances and reverse consolidations, explain in plain words that the agreement is written as a purchase of the business's future receivables (future sales) starting from the date it was signed, not as a loan; that because it isn't a loan it generally isn't subject to the interest-rate limits that apply to loans, which is how the cost can be so high even though the contract never calls it interest; and what the contract lists as the funder's security, which is usually the future receivables (if the contract also lists other business assets, say so accurately). For loans, say it is a loan and describe any collateral listed. Never mention personal guarantees or guarantors. risk: medium for merchant cash advances and reverse consolidations; for loans, low if unsecured, else medium.",
     "- is_mca_contract = true only for merchant cash advances and reverse consolidations. If the document is not a financing agreement at all, set agreement_type=\"not_financing\" and explain in summary.",
     "",
     isPdf ? "The contract is attached as a PDF document." : contractText ? "CONTRACT TEXT:\n" + contractText : "The contract pages are attached as images, in order."
